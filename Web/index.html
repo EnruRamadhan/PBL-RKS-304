@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesona Pantai Batam</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+  <!-- Header -->
+  <header class="bg-blue-600 text-white py-6 shadow-lg">
+    <div class="container mx-auto text-center">
+      <h1 class="text-4xl font-bold">Pesona Pantai Batam</h1>
+      <p class="mt-2 text-lg">Temukan dan booking destinasi pantai favoritmu di Batam 🌊</p>
+    </div>
+  </header>
+
+  <!-- Section Pantai -->
+  <section id="pantai" class="container mx-auto py-16 px-6">
+    <h3 class="text-3xl font-bold text-center mb-10">Daftar Pantai Populer</h3>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-10">
+      
+      <!-- Daftar Pantai -->
+      <div class="lg:col-span-3">
+        <!-- Search Bar -->
+        <div class="flex justify-center mb-8">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Cari pantai..." 
+            class="w-full md:w-1/2 p-3 rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onkeyup="filterPantai()">
+        </div>
+
+        <!-- Grid Pantai -->
+        <div id="pantaiList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Semua card pantai (punyamu tadi, aku biarin sama persis) -->
+          <div onclick="pilihPantai('Pantai Nongsa')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0f/84/71/7e/pantai-nongsa.jpg" alt="Pantai Nongsa" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Nongsa</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp.20.000.</p>
+              <p class="text-sm text-gray-600">Jam buka: 08.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Pantai dengan pasir putih dan pemandangan Singapura dari kejauhan.</p>
+            </div>
+          </div>
+
+          <div onclick="pilihPantai('Pantai Melayu')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="https://media-cdn.tripadvisor.com/media/photo-s/18/f0/82/f8/pantai-melayu.jpg" alt="Pantai Melayu" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Melayu</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp.10.000.</p>
+              <p class="text-sm text-gray-600">Jam buka: 07.00 - 17.00</p>
+              <p class="text-sm text-gray-600">Cocok untuk liburan keluarga dan piknik santai dengan banyak warung makan disekitar.</p>
+            </div>
+          </div>
+
+          <div onclick="pilihPantai('Pantai Vio-Vio')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="https://media-cdn.tripadvisor.com/media/photo-s/18/f0/83/24/pantai-vio-vio.jpg" alt="Pantai Vio-Vio" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Vio-Vio</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp.15.000.</p>
+              <p class="text-sm text-gray-600">Jam buka: 09.00 - 19.00</p>
+              <p class="text-sm text-gray-600"> Pantai instagramable dengan spot foto jembatan kayu dan sunset terbaik di Batam.</p>
+            </div>
+          </div>
+
+          <div onclick="pilihPantai('Pantai Elyora')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="https://indonesiakaya.com/wp-content/uploads/2020/10/pantai_elyora.jpg" alt="Pantai Elyora" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Elyora</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp.25.000.</p>
+              <p class="text-sm text-gray-600">Jam buka: 08.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Pantai eksotis di Galang Baru dengan panorama laut biru jernih.</p>
+            </div>
+          </div>
+
+          <div onclick="pilihPantai('Pantai Marina')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="https://asset.kompas.com/crops/2oF75aDdyCjTiM_1JUq1T1p-M4M=/0x0:1000x667/750x500/data/photo/2021/06/28/60d99f417c927.jpg" alt="Pantai Marina" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Marina</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp.30.000.</p>
+              <p class="text-sm text-gray-600">Jam buka: 07.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Pantai dengan taman indah dekat kawasan resort.</p>
+            </div>
+          </div>
+
+          <div onclick="pilihPantai('Pantai Tanjung Bemban')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="https://pesonakota.batam.go.id/wp-content/uploads/2021/06/Pantai-Tanjung-Bemban.jpg" alt="Pantai Tanjung Bemban" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Tanjung Bemban</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp.5.000.</p>
+              <p class="text-sm text-gray-600">Jam buka: 08.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Pantai dengan suasana lokal yang asri.</p>
+            </div>
+          </div>
+
+          <div onclick="pilihPantai('Pantai Melur')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="https://media-cdn.tripadvisor.com/media/photo-s/0d/2d/3f/ae/pantai-melur.jpg" alt="Pantai Melur" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Melur</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp.10.000.</p>
+              <p class="text-sm text-gray-600">Jam buka: 08.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Pantai luas dengan pasir halus.</p>
+            </div>
+          </div>
+
+          <div onclick="pilihPantai('Pantai Barelang')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="https://asset.kompas.com/crops/v0WBc6dSAd1psHsm0K5nYEnQ30c=/0x0:1000x667/750x500/data/photo/2021/01/13/5ffe407fa88ea.jpg" alt="Pantai Barelang" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Barelang</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp.20.000.</p>
+              <p class="text-sm text-gray-600">Jam buka: 08.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Dekat jembatan ikonik Barelang.</p>
+            </div>
+          </div>
+
+          <div onclick="pilihPantai('Pantai Setokok')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="https://media-cdn.tripadvisor.com/media/photo-s/18/f0/82/12/pantai-setokok.jpg" alt="Pantai Setokok" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Setokok</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp.15.000.</p>
+              <p class="text-sm text-gray-600">Jam buka: 08.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Pantai alami dengan air jernih.</p>
+            </div>
+          </div>
+
+          <div onclick="pilihPantai('Pulau Abang')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="https://indonesiakaya.com/wp-content/uploads/2020/10/pulau_abang.jpg" alt="Pulau Abang" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pulau Abang</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp.35.000.</p>
+              <p class="text-sm text-gray-600">Jam buka: 08.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Destinasi snorkeling favorit.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Booking & Keranjang -->
+      <aside class="bg-white rounded-2xl shadow-lg p-6 h-fit">
+        <h4 class="text-xl font-semibold mb-4 text-blue-600">Booking Tiket</h4>
+
+        <label for="tanggal" class="block text-gray-700 mb-2">Pilih Tanggal:</label>
+        <input type="date" id="tanggal" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4">
+        
+        <label for="pantaiSelect" class="block text-gray-700 mb-2">Pilih Pantai:</label>
+        <select id="pantaiSelect" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4">
+          <option>Pantai Nongsa</option>
+          <option>Pantai Melayu</option>
+          <option>Pantai Vio-Vio</option>
+          <option>Pantai Elyora</option>
+          <option>Pantai Marina</option>
+          <option>Pantai Tanjung Bemban</option>
+          <option>Pantai Melur</option>
+          <option>Pantai Barelang</option>
+          <option>Pantai Setokok</option>
+          <option>Pulau Abang</option>
+        </select>
+
+        <label for="jumlah" class="block text-gray-700 mb-2">Jumlah Tiket:</label>
+        <input type="number" id="jumlah" min="1" value="1" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4">
+
+        <!-- Tombol Tambah ke Keranjang -->
+        <button onclick="tambahKeranjang()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition mb-4">
+          Tambah ke Keranjang
+        </button>
+
+        <!-- Keranjang -->
+        <h4 class="text-lg font-semibold mb-2">Keranjang Pemesanan</h4>
+        <ul id="keranjangList" class="mb-4 text-gray-700 space-y-2"></ul>
+
+        <!-- Total Harga -->
+        <p id="totalKeranjang" class="font-bold text-right text-blue-600 mb-4">Total: Rp0</p>
+
+        <!-- Checkout -->
+        <button onclick="checkout()" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition">Pesan Sekarang</button>
+
+        <!-- Bukti Pemesanan -->
+        <div id="buktiBox" class="mt-6 hidden border-t pt-4">
+        <div id="hasilBooking" class="bg-gray-100 p-3 rounded text-sm whitespace-pre-wrap break-words font-mono"></div>
+        <h4 class="font-bold text-gray-800 mb-2">Bukti Pemesanan</h4>
+        <pre id="hasilBooking" class="bg-gray-100 p-3 rounded text-sm"></pre>
+        <button onclick="downloadBuktiTXT()" class="mt-3 w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition">Download Bukti (TXT)</button>
+        <button onclick="downloadBuktiPDF()" class="mt-3 w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition">Download Bukti (PDF)</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Script -->
+  <script>
+    // Harga tiket per pantai
+    const hargaPantai = {
+      "Pantai Nongsa": 20000,
+      "Pantai Melayu": 10000,
+      "Pantai Vio-Vio": 15000,
+      "Pantai Elyora": 25000,
+      "Pantai Marina": 30000,
+      "Pantai Tanjung Bemban": 5000,
+      "Pantai Melur": 10000,
+      "Pantai Barelang": 20000,
+      "Pantai Setokok": 15000,
+      "Pulau Abang": 35000
+    };
+
+    // Search Filter
+    function filterPantai() {
+      const input = document.getElementById("searchInput").value.toLowerCase();
+      const cards = document.querySelectorAll("#pantaiList > div");
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(input) ? "block" : "none";
+      });
+    }
+
+    // Pilih pantai otomatis ke dropdown
+    function pilihPantai(namaPantai) {
+      document.getElementById("pantaiSelect").value = namaPantai;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Keranjang
+    let keranjang = [];
+
+    function tambahKeranjang() {
+      const tanggal = document.getElementById("tanggal").value;
+      const pantai = document.getElementById("pantaiSelect").value;
+      const jumlah = parseInt(document.getElementById("jumlah").value) || 1;
+
+      if (!tanggal || !pantai) {
+        alert("Silakan pilih tanggal, pantai, dan jumlah tiket terlebih dahulu.");
+        return;
+      }
+
+      // Cek tanggal tidak boleh lebih kecil dari hari ini
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const chosen = new Date(tanggal);
+      if (chosen < today) {
+        alert("Tanggal yang dipilih sudah lewat. Silakan pilih tanggal yang valid.");
+        return;
+      }
+
+      keranjang.push({ pantai, tanggal, jumlah });
+      renderKeranjang();
+    }
+
+    function hapusItem(index) {
+      keranjang.splice(index, 1);
+      renderKeranjang();
+    }
+
+    function renderKeranjang() {
+      const list = document.getElementById("keranjangList");
+      list.innerHTML = "";
+      let total = 0;
+
+      keranjang.forEach((item, index) => {
+        const hargaSatuan = hargaPantai[item.pantai] || 0;
+        const totalHarga = hargaSatuan * item.jumlah;
+        total += totalHarga;
+
+        const li = document.createElement("li");
+        li.className = "flex justify-between items-center bg-gray-100 p-2 rounded";
+        li.innerHTML = `
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" value="${index}" class="itemCheckbox">
+            <span>${item.pantai} - ${item.tanggal} | ${item.jumlah} tiket (Rp${totalHarga.toLocaleString()})</span>
+          </label>
+          <button onclick="hapusItem(${index})" class="text-red-500 hover:underline">Hapus</button>
+        `;
+        list.appendChild(li);
+      });
+
+      document.getElementById("totalKeranjang").innerText = `Total: Rp${total.toLocaleString()}`;
+    }
+
+    function checkout() {
+      const selectedCheckboxes = document.querySelectorAll(".itemCheckbox:checked");
+      const hasilBox = document.getElementById("hasilBooking");
+      const buktiBox = document.getElementById("buktiBox");
+
+      if (selectedCheckboxes.length === 0) {
+        hasilBox.innerText = "Pilih minimal satu item dari keranjang untuk dipesan!";
+        buktiBox.classList.remove("hidden");
+        return;
+      }
+
+      let pesan = "=== Bukti Pemesanan ===\n";
+      let totalHarga = 0;
+      const selectedIndexes = [];
+
+      selectedCheckboxes.forEach(cb => {
+        const item = keranjang[cb.value];
+        if (item) {
+          const harga = hargaPantai[item.pantai] || 0;
+          const subtotal = harga * item.jumlah;
+          pesan += `• ${item.pantai} | ${item.tanggal} | ${item.jumlah} tiket (Rp${subtotal.toLocaleString()})\n`;
+          totalHarga += subtotal;
+          selectedIndexes.push(parseInt(cb.value));
+        }
+      });
+
+      pesan += `\nTotal Bayar: Rp${totalHarga.toLocaleString()}\nTerima kasih sudah memesan!`;
+
+      // Hapus hanya item yang sudah dipesan
+      keranjang = keranjang.filter((_, idx) => !selectedIndexes.includes(idx));
+      renderKeranjang();
+
+      hasilBox.innerText = pesan;
+      buktiBox.classList.remove("hidden");
+    }
+  </script>
+
+</body>
+</html>
