@@ -3,11 +3,6 @@ const usernameInput = document.getElementById('username');
 const passwordInput = document.getElementById('password');
 const loginMessage = document.getElementById('loginMessage');
 
-const dummyUser = {
-  username: "aerin",
-  password: "Aa123456!" // contoh password kuat
-};
-
 // Fungsi untuk toggle password visibility
 function togglePasswordVisibility() {
   if (passwordInput.type === "password") {
@@ -47,12 +42,18 @@ loginForm.addEventListener('submit', function(e) {
     return;
   }
 
-  // Cek login
-  if (username === dummyUser.username && password === dummyUser.password) {
+   // Ambil data user dari localStorage (hasil register)
+  const savedPassword = localStorage.getItem(username);
+
+  if (savedPassword && savedPassword === password) {
     loginMessage.style.color = 'green';
     loginMessage.textContent = "Login berhasil! Mengarahkan...";
+    
+    // Simpan sesi login
+    localStorage.setItem("loggedInUser", username);
+
     setTimeout(() => {
-      window.location.href = "index.html";
+      window.location.href = "index.html"; 
     }, 1500);
   } else {
     loginMessage.style.color = 'red';
