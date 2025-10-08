@@ -1,16 +1,23 @@
-/* Reset dan font */
+/* 🌴 ExploreBatam Register Page Theme */
+/* ===== Reset & Global Style ===== */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #6dd5ed, #2193b0); /* sama kayak login */
+  font-family: 'Poppins', sans-serif;
   margin: 0;
   padding: 0;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: linear-gradient(
+      rgba(0, 30, 60, 0.55),
+      rgba(0, 30, 60, 0.55)
+    ),
+    url("images/pantai1.jpg") center/cover no-repeat;
   animation: fadeIn 1s ease-in-out;
+  color: #0d1b2a;
 }
 
+/* ===== Container ===== */
 .register-container {
   display: flex;
   justify-content: center;
@@ -18,98 +25,150 @@ body {
   width: 100%;
 }
 
+/* ===== Card Styling ===== */
 .register-card {
-  background: #fff;
-  width: 400px;
-  padding: 35px;
-  border-radius: 16px;
-  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  width: 420px;
+  padding: 45px 35px;
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
   text-align: center;
+  color: #1e3a8a;
   animation: slideIn 0.8s ease;
 }
 
+/* ===== Header ===== */
 .register-card h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e3a8a; /* warna biru utama dari landing */
   margin-bottom: 8px;
-  color: #2c3e50;
+  letter-spacing: 0.5px;
 }
 
 .subtitle {
   font-size: 14px;
-  color: #777;
-  margin-bottom: 20px;
+  color: #3b82f6;
+  margin-bottom: 28px;
 }
 
+/* ===== Input Group ===== */
 .input-group {
   display: flex;
   align-items: center;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 10px 12px;
-  margin-bottom: 18px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  transition: 0.3s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.input-group:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .input-group i {
-  color: #888;
-  font-size: 16px;
+  color: #1e3a8a;
+  font-size: 18px;
   margin-right: 10px;
 }
 
 .input-group input {
+  background: transparent;
   border: none;
   outline: none;
   flex: 1;
   font-size: 15px;
+  color: #0f172a;
 }
 
-.input-group input:focus {
-  border-color: #2193b0;
+.input-group input::placeholder {
+  color: #64748b;
 }
 
+/* ===== Tombol ===== */
 button {
-  background: linear-gradient(to right, #2193b0, #6dd5ed);
-  color: white;
+  background: linear-gradient(to right, #3b82f6, #1d4ed8);
+  color: #fff;
   border: none;
-  padding: 12px;
+  padding: 13px;
   width: 100%;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
-  font-weight: bold;
-  transition: transform 0.2s, background 0.3s;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(29, 78, 216, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 button:hover {
   transform: scale(1.05);
-  background: linear-gradient(to right, #1b7a90, #56c1db);
+  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5);
 }
 
+/* ===== Pesan & Link ===== */
 #registerMessage {
   margin-top: 12px;
   font-size: 14px;
   min-height: 18px;
+  color: #1e293b;
 }
 
-/* Link ke login */
 .switch-page {
-  margin-top: 15px;
+  margin-top: 20px;
   font-size: 14px;
+  color: #334155;
 }
+
 .switch-page a {
-  color: #2193b0;
+  color: #1e3a8a;
   text-decoration: none;
+  font-weight: 600;
 }
+
 .switch-page a:hover {
   text-decoration: underline;
 }
 
-/* Animasi */
+/* ===== Ikon Mata (Show/Hide Password) ===== */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  flex: 1;
+  padding-right: 35px; /* ruang buat ikon mata */
+}
+
+#toggleRegisterPassword {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #1e3a8a;
+  font-size: 17px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+#toggleRegisterPassword:hover {
+  color: #0f172a;
+}
+
+/* ===== Animasi ===== */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @keyframes slideIn {
-  from { transform: translateY(-30px); opacity: 0; }
+  from { transform: translateY(-25px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
