@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pesona Destinasi Batam</title>
 
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -41,67 +41,113 @@
         <!-- Grid destinasi -->
         <div id="destinasiList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
 
-          <!-- Data destinasi -->
+          <!-- Pantai Nongsa -->
           <div onclick="pilihDestinasi('Pantai Nongsa')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
             <img src="{{ url_for('static', filename='images/nongsa.jpg') }}" alt="Pantai Nongsa" class="w-full h-40 object-cover">
             <div class="p-4">
               <h4 class="text-lg font-semibold">Pantai Nongsa</h4>
-              <p class="text-sm text-gray-600">Harga tiket: Rp50.000</p>
+              <p class="text-sm text-gray-600">Harga tiket: Rp10.000</p>
               <p class="text-sm text-gray-600">Jam buka: 24 Jam</p>
+              <p class="text-sm text-gray-600">Pantai populer untuk bersantai dan menikmati matahari terbenam di Batam.</p>
             </div>
           </div>
 
-          <div onclick="pilihDestinasi('Pantai Marina')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
-            <img src="{{ url_for('static', filename='images/marina.jpeg') }}" alt="Pantai Marina" class="w-full h-40 object-cover">
-            <div class="p-4">
-              <h4 class="text-lg font-semibold">Pantai Marina</h4>
-              <p class="text-sm text-gray-600">Harga tiket: Rp40.000</p>
-              <p class="text-sm text-gray-600">Jam buka: 07.00 - 18.00</p>
-            </div>
-          </div>
-
+          <!-- Pantai Melayu -->
           <div onclick="pilihDestinasi('Pantai Melayu')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
             <img src="{{ url_for('static', filename='images/melayu.jpg') }}" alt="Pantai Melayu" class="w-full h-40 object-cover">
             <div class="p-4">
               <h4 class="text-lg font-semibold">Pantai Melayu</h4>
-              <p class="text-sm text-gray-600">Harga tiket: Rp45.000</p>
-              <p class="text-sm text-gray-600">Jam buka: 06.00 - 19.00</p>
+              <p class="text-sm text-gray-600">Harga tiket: Rp15.000</p>
+              <p class="text-sm text-gray-600">Jam buka: 07.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Pantai luas dengan pasir putih halus dan ombak yang tenang, cocok untuk keluarga.</p>
             </div>
           </div>
 
+          <!-- Pantai Vio-Vio -->
+          <div onclick="pilihDestinasi('Pantai Vio-Vio')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="{{ url_for('static', filename='images/viovio.jpeg') }}" alt="Pantai Vio-Vio" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Vio-Vio</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp10.000</p>
+              <p class="text-sm text-gray-600">Jam buka: 08.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Menawarkan spot foto instagramable dan tempat snorkeling yang indah.</p>
+            </div>
+          </div>
+
+          <!-- Pantai Elyora -->
+          <div onclick="pilihDestinasi('Pantai Elyora')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="{{ url_for('static', filename='images/elyora.jpg') }}" alt="Pantai Elyora" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Elyora</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp10.000</p>
+              <p class="text-sm text-gray-600">Jam buka: 08.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Pantai dengan pemandangan indah dan area perkemahan yang nyaman.</p>
+            </div>
+          </div>
+
+          <!-- Pantai Marina -->
+          <div onclick="pilihDestinasi('Pantai Marina')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="{{ url_for('static', filename='images/marina.jpeg') }}" alt="Pantai Marina" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Marina</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp20.000</p>
+              <p class="text-sm text-gray-600">Jam buka: 07.00 - 19.00</p>
+              <p class="text-sm text-gray-600">Tempat wisata dengan taman dan spot foto modern di pinggir pantai.</p>
+            </div>
+          </div>
+
+          <!-- Pantai Melur -->
+          <div onclick="pilihDestinasi('Pantai Melur')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
+            <img src="{{ url_for('static', filename='images/melur.jpeg') }}" alt="Pantai Melur" class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h4 class="text-lg font-semibold">Pantai Melur</h4>
+              <p class="text-sm text-gray-600">Harga tiket: Rp5.000</p>
+              <p class="text-sm text-gray-600">Jam buka: 24 Jam</p>
+              <p class="text-sm text-gray-600">Pantai dengan pasir putih dan suasana alami, cocok untuk liburan santai.</p>
+            </div>
+          </div>
+
+          <!-- Taman Rusa -->
           <div onclick="pilihDestinasi('Taman Rusa')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
             <img src="{{ url_for('static', filename='images/tamanrusa.jpeg') }}" alt="Taman Rusa" class="w-full h-40 object-cover">
             <div class="p-4">
               <h4 class="text-lg font-semibold">Taman Rusa</h4>
-              <p class="text-sm text-gray-600">Harga tiket: Rp30.000</p>
-              <p class="text-sm text-gray-600">Jam buka: 07.00 - 17.00</p>
+              <p class="text-sm text-gray-600">Harga tiket: Rp5.000</p>
+              <p class="text-sm text-gray-600">Jam buka: 07.00 - 18.00</p>
+              <p class="text-sm text-gray-600">Tempat wisata edukatif dengan rusa dan area jogging yang sejuk.</p>
             </div>
           </div>
 
+          <!-- Kampung Vietnam -->
           <div onclick="pilihDestinasi('Kampung Vietnam')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
             <img src="{{ url_for('static', filename='images/vietnam.jpg') }}" alt="Kampung Vietnam" class="w-full h-40 object-cover">
             <div class="p-4">
               <h4 class="text-lg font-semibold">Kampung Vietnam</h4>
-              <p class="text-sm text-gray-600">Harga tiket: Rp35.000</p>
+              <p class="text-sm text-gray-600">Harga tiket: Rp20.000</p>
               <p class="text-sm text-gray-600">Jam buka: 08.00 - 17.00</p>
+              <p class="text-sm text-gray-600">Situs sejarah peninggalan pengungsi Vietnam dengan suasana klasik.</p>
             </div>
           </div>
 
+          <!-- Mata Kucing -->
           <div onclick="pilihDestinasi('Mata Kucing')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
             <img src="{{ url_for('static', filename='images/matakucing.jpeg') }}" alt="Mata Kucing" class="w-full h-40 object-cover">
             <div class="p-4">
               <h4 class="text-lg font-semibold">Mata Kucing</h4>
-              <p class="text-sm text-gray-600">Harga tiket: Rp25.000</p>
-              <p class="text-sm text-gray-600">Jam buka: 07.00 - 17.30</p>
+              <p class="text-sm text-gray-600">Harga tiket: Rp10.000</p>
+              <p class="text-sm text-gray-600">Jam buka: 08.00 - 17.00</p>
+              <p class="text-sm text-gray-600">Kawasan wisata alam dengan kolam renang, hutan, dan taman bermain.</p>
             </div>
           </div>
 
+          <!-- Ocarina Park -->
           <div onclick="pilihDestinasi('Ocarina Park')" class="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition">
             <img src="{{ url_for('static', filename='images/ocarina.jpeg') }}" alt="Ocarina Park" class="w-full h-40 object-cover">
             <div class="p-4">
               <h4 class="text-lg font-semibold">Ocarina Park</h4>
-              <p class="text-sm text-gray-600">Harga tiket: Rp60.000</p>
-              <p class="text-sm text-gray-600">Jam buka: 09.00 - 20.00</p>
+              <p class="text-sm text-gray-600">Harga tiket: Rp25.000</p>
+              <p class="text-sm text-gray-600">Jam buka: 09.00 - 21.00</p>
+              <p class="text-sm text-gray-600">Taman hiburan keluarga dengan wahana modern di tepi laut Batam.</p>
             </div>
           </div>
 
@@ -117,10 +163,12 @@
 
         <label for="destinasiSelect" class="block text-gray-700 mb-2">Pilih Destinasi:</label>
         <select id="destinasiSelect" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4">
-          <option value="">-- Pilih Destinasi --</option>
           <option>Pantai Nongsa</option>
           <option>Pantai Melayu</option>
+          <option>Pantai Vio-Vio</option>
+          <option>Pantai Elyora</option>
           <option>Pantai Marina</option>
+          <option>Pantai Melur</option>
           <option>Taman Rusa</option>
           <option>Kampung Vietnam</option>
           <option>Mata Kucing</option>
@@ -130,13 +178,19 @@
         <label for="jumlah" class="block text-gray-700 mb-2">Jumlah Tiket:</label>
         <input type="number" id="jumlah" min="1" value="1" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4">
 
-        <p id="previewHarga" class="text-blue-600 font-semibold mb-3"></p>
+        <button onclick="tambahKeranjang()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition mb-4">
+          Tambah ke Keranjang
+        </button>
+
+        <h4 class="text-lg font-semibold mb-2">Keranjang Pemesanan</h4>
+        <ul id="keranjangList" class="mb-4 text-gray-700 space-y-2"></ul>
+        <p id="totalKeranjang" class="font-bold text-right text-blue-600 mb-4">Total: Rp0</p>
 
         <button onclick="checkout()" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition">
           Pesan Sekarang
         </button>
 
-        <div id="hasilBox" class="mt-6 hidden border-t pt-4">
+        <div id="buktiBox" class="mt-6 hidden border-t pt-4">
           <h4 class="font-bold text-gray-800 mb-2">Bukti Pemesanan</h4>
           <pre id="hasilBooking" class="bg-gray-100 p-3 rounded text-sm whitespace-pre-wrap break-words font-mono"></pre>
           <div class="mt-4">
@@ -144,86 +198,128 @@
             <input type="file" id="buktiPembayaran" accept="image/*" class="border rounded p-2 w-full">
             <div id="previewBukti" class="mt-3"></div>
           </div>
+          <button onclick="downloadBuktiTXT()" class="mt-3 w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition">Download Bukti (TXT)</button>
+          <button onclick="downloadBuktiPDF()" class="mt-3 w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition">Download Bukti (PDF)</button>
         </div>
       </aside>
     </div>
   </section>
 
-  <!-- ===================== SCRIPT ===================== -->
   <script>
-    const hargaDestinasi = {
-      "Pantai Nongsa": 50000,
-      "Pantai Marina": 40000,
-      "Pantai Melayu": 45000,
-      "Taman Rusa": 30000,
-      "Kampung Vietnam": 35000,
-      "Mata Kucing": 25000,
-      "Ocarina Park": 60000
-    };
+    const destinasiList = document.getElementById("destinasiList");
+    const searchInput = document.getElementById("searchInput");
+    const keranjangList = document.getElementById("keranjangList");
+    const totalKeranjang = document.getElementById("totalKeranjang");
+    const buktiBox = document.getElementById("buktiBox");
+    const hasilBooking = document.getElementById("hasilBooking");
+    const destinasiSelect = document.getElementById("destinasiSelect");
+    const jumlahInput = document.getElementById("jumlah");
 
-    function pilihDestinasi(nama) {
-      document.getElementById("destinasiSelect").value = nama;
-      updatePreviewHarga();
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    let keranjang = [];
+
+    function filterDestinasi() {
+      const filter = searchInput.value.toLowerCase();
+      const destinasi = destinasiList.getElementsByTagName("div");
+      for (let i = 0; i < destinasi.length; i++) {
+        let title = destinasi[i].querySelector("h4");
+        destinasi[i].style.display = title && title.textContent.toLowerCase().includes(filter)
+          ? ""
+          : "none";
+      }
     }
 
-    function updatePreviewHarga() {
-      const destinasi = document.getElementById("destinasiSelect").value;
-      const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
-      const harga = hargaDestinasi[destinasi] || 0;
-      const total = harga * jumlah;
+    function pilihDestinasi(nama) {
+      destinasiSelect.value = nama;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-      document.getElementById("previewHarga").innerText =
-        destinasi && jumlah > 0 ? `Total Harga: Rp${total.toLocaleString()}` : "";
+    function tambahKeranjang() {
+      const destinasi = destinasiSelect.value;
+      const jumlah = parseInt(jumlahInput.value);
+      const harga = getHarga(destinasi);
+      const total = harga * jumlah;
+      keranjang.push({ destinasi, jumlah, total });
+      renderKeranjang();
+    }
+
+    function renderKeranjang() {
+      keranjangList.innerHTML = "";
+      let total = 0;
+      keranjang.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `${item.destinasi} x${item.jumlah} = Rp${item.total.toLocaleString()} 
+        <button onclick="hapusItem(${index})" class="text-red-500 ml-2">Hapus</button>`;
+        keranjangList.appendChild(li);
+        total += item.total;
+      });
+      totalKeranjang.textContent = "Total: Rp" + total.toLocaleString();
+    }
+
+    function hapusItem(index) {
+      keranjang.splice(index, 1);
+      renderKeranjang();
+    }
+
+    function getHarga(destinasi) {
+      const hargaList = {
+        "Pantai Nongsa": 10000,
+        "Pantai Melayu": 15000,
+        "Pantai Vio-Vio": 10000,
+        "Pantai Elyora": 10000,
+        "Pantai Marina": 20000,
+        "Pantai Melur": 5000,
+        "Taman Rusa": 5000,
+        "Kampung Vietnam": 20000,
+        "Mata Kucing": 10000,
+        "Ocarina Park": 25000,
+      };
+      return hargaList[destinasi] || 0;
     }
 
     function checkout() {
+      if (keranjang.length === 0) return alert("Keranjang masih kosong!");
+
       const tanggal = document.getElementById("tanggal").value;
-      const destinasi = document.getElementById("destinasiSelect").value;
-      const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
-      const harga = hargaDestinasi[destinasi] || 0;
-      const total = harga * jumlah;
+      if (!tanggal) return alert("Pilih tanggal terlebih dahulu!");
 
-      const hasilBox = document.getElementById("hasilBox");
-      const hasilBooking = document.getElementById("hasilBooking");
+      let output = `📅 Tanggal: ${tanggal}\n\n`;
+      keranjang.forEach(item => {
+        output += `• ${item.destinasi} x${item.jumlah} = Rp${item.total.toLocaleString()}\n`;
+      });
+      output += "\n" + totalKeranjang.textContent;
 
-      if (!tanggal || !destinasi || jumlah < 1) {
-        hasilBooking.innerText = "⚠️ Silakan isi semua data booking terlebih dahulu!";
-        hasilBox.classList.remove("hidden");
-        return;
-      }
-
-      let pesan = "=== Bukti Pemesanan ===\n";
-      pesan += `Destinasi  : ${destinasi}\n`;
-      pesan += `Tanggal    : ${tanggal}\n`;
-      pesan += `Jumlah     : ${jumlah} tiket\n`;
-      pesan += `Total Bayar: Rp${total.toLocaleString()}\n`;
-      pesan += "\nSilakan upload bukti pembayaran di bawah.";
-
-      hasilBooking.innerText = pesan;
-      hasilBox.classList.remove("hidden");
+      hasilBooking.textContent = output;
+      buktiBox.classList.remove("hidden");
+      keranjang = [];
+      renderKeranjang();
     }
 
-    // Event listener
-    document.getElementById("destinasiSelect").addEventListener("change", updatePreviewHarga);
-    document.getElementById("jumlah").addEventListener("input", updatePreviewHarga);
-    document.getElementById("tanggal").addEventListener("change", updatePreviewHarga);
-
-    // Preview gambar setelah upload bukti pembayaran
-    document.getElementById("buktiPembayaran").addEventListener("change", function () {
-      const file = this.files[0];
+    document.getElementById("buktiPembayaran").addEventListener("change", function (e) {
+      const file = e.target.files[0];
       const preview = document.getElementById("previewBukti");
-
+      preview.innerHTML = "";
       if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          preview.innerHTML = `<img src="${e.target.result}" alt="Bukti Pembayaran" class="w-64 mt-2 rounded shadow">`;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        preview.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.classList.add("rounded-lg", "mt-2", "max-h-48");
+        preview.appendChild(img);
       }
     });
+
+    function downloadBuktiTXT() {
+      const blob = new Blob([hasilBooking.textContent], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "bukti_pemesanan.txt";
+      link.click();
+    }
+
+    function downloadBuktiPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text(hasilBooking.textContent, 10, 10);
+      doc.save("bukti_pemesanan.pdf");
+    }
   </script>
 
 </body>
