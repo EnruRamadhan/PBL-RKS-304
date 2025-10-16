@@ -13,7 +13,7 @@ body {
       rgba(0, 30, 60, 0.55),
       rgba(0, 30, 60, 0.55)
     ),
-    url("/Web/static/images/barelang.jpg") center/cover no-repeat;
+    url("../images/barelang.jpg") center/cover no-repeat;
   animation: fadeIn 1s ease-in-out;
   color: #0d1b2a;
 }
@@ -31,7 +31,7 @@ body {
   z-index: -1;
   animation: slideShow 25s infinite;
   transition: background-image 1s ease-in-out;
-  filter: brightness(0.7); /* biar form lebih jelas */
+  filter: brightness(0.7);
 }
 
 /* ===== Container ===== */
@@ -158,4 +158,9 @@ button:hover {
 @keyframes slideIn {
   from { transform: translateY(-30px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
