@@ -12,7 +12,7 @@ body {
       rgba(0, 30, 60, 0.55),
       rgba(0, 30, 60, 0.55)
     ),
-    url("/Web/static/images/pantai1.jpg") center/cover no-repeat;
+    url("../images/pantai1.jpg") center/cover no-repeat;
   animation: fadeIn 1s ease-in-out;
   color: #0d1b2a;
 }
