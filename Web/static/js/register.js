@@ -67,6 +67,6 @@ registerForm.addEventListener("submit", function(e) {
   registerMessage.textContent = "✅ Registrasi berhasil! Mengarahkan ke login...";
 
   setTimeout(() => {
-    window.location.href = "login.html";
+    window.location.href = "/login";
   }, 1500);
 });

@@ -64,7 +64,7 @@ loginForm.addEventListener("submit", function (e) {
     localStorage.setItem("loggedInUser", username);
 
     setTimeout(() => {
-      window.location.href = "index.html";
+      window.location.href = "/index";
     }, 1500);
   } else {
     loginMessage.style.color = "red";

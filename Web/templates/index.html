@@ -12,14 +12,42 @@
 
 <body class="bg-gray-50 text-gray-900">
 
-  <!-- Header -->
-  <header class="bg-blue-600 text-white py-6 shadow-lg">
-    <div class="container mx-auto text-center">
-      <h1 class="text-4xl font-bold">Pesona Destinasi Wisata di Batam</h1>
-      <p class="mt-2 text-lg">Temukan dan booking destinasi wisata favoritmu di Batam</p>
-      <button onclick="logout()" class="mt-4 bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600">Logout</button>
+ <!-- Header Modern -->
+<header class="fixed top-0 left-0 w-full bg-blue-600/20 backdrop-blur-md text-white shadow-lg z-50">
+  <div class="container mx-auto flex items-center justify-center py-5 relative">
+
+    <!-- Tombol Logout di kiri atas -->
+    <button 
+      onclick="logout()" 
+      class="absolute right-6 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-transform transform hover:scale-105">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+
+    <!-- Judul Halaman -->
+    <div class="text-center">
+      <h1 class="text-3xl md:text-4xl font-extrabold drop-shadow-lg">🌴 Pesona Destinasi Wisata Batam</h1>
+      <p class="mt-1 text-lg text-gray-100 drop-shadow-md">Temukan dan booking destinasi wisata favoritmu di Batam</p>
     </div>
-  </header>
+
+  </div>
+</header>
+
+<!-- Spacer supaya konten tidak ketutup header -->
+<div class="h-28"></div>
+
+<script>
+  // Fungsi Logout
+  function logout() {
+    // Hapus data login dari localStorage
+    localStorage.removeItem("loggedInUser");
+
+    // Pesan opsional
+    alert("Anda telah logout. Kembali ke halaman utama.");
+
+    // Arahkan ke halaman landing
+    window.location.href = "/landing";
+  }
+</script>
 
   <!-- Section Destinasi -->
   <section id="destinasi" class="container mx-auto py-16 px-6">
