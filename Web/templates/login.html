@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | Explore Batam</title>
-  <link rel="stylesheet" href="login.css">
+
+  <!-- ✅ Gunakan url_for agar Flask tahu lokasi file -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -31,10 +33,14 @@
         <p id="loginMessage"></p>
       </form>
 
-      <p class="switch-page">Belum punya akun? <a href="register.html">Register</a></p>
+      <p class="switch-page">
+        Belum punya akun?
+        <a href="register">Register</a>
+      </p>
     </div>
   </div>
 
-  <script src="login.js"></script>
+  <!-- ✅ Gunakan url_for() untuk file JS -->
+  <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </body>
 </html>
