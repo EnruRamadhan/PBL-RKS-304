@@ -14,7 +14,7 @@ body {
     ),
     url("../images/pantai1.jpg") center/cover no-repeat;
   animation: fadeIn 1s ease-in-out;
-  color: #0d1b2a;
+  color: #f9a8d4;
 }
 
 /* ===== Container ===== */
@@ -35,7 +35,7 @@ body {
   border-radius: 24px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
   text-align: center;
-  color: #1e3a8a;
+  color: #f9a8d4;
   animation: slideIn 0.8s ease;
 }
 
@@ -43,14 +43,14 @@ body {
 .register-card h2 {
   font-size: 28px;
   font-weight: 700;
-  color: #1e3a8a; /* warna biru utama dari landing */
+  color: #d81c83; /* warna biru utama dari landing */
   margin-bottom: 8px;
   letter-spacing: 0.5px;
 }
 
 .subtitle {
   font-size: 14px;
-  color: #3b82f6;
+  color: #f472b6;
   margin-bottom: 28px;
 }
 
@@ -72,7 +72,7 @@ body {
 }
 
 .input-group i {
-  color: #1e3a8a;
+  color: #f9a8d4;
   font-size: 18px;
   margin-right: 10px;
 }
@@ -92,7 +92,7 @@ body {
 
 /* ===== Tombol ===== */
 button {
-  background: linear-gradient(to right, #3b82f6, #1d4ed8);
+  background: linear-gradient(to right, #f9a8d4, #e25da2);
   color: #fff;
   border: none;
   padding: 13px;
@@ -122,11 +122,11 @@ button:hover {
 .switch-page {
   margin-top: 20px;
   font-size: 14px;
-  color: #334155;
+  color: #f9a8d4;
 }
 
 .switch-page a {
-  color: #1e3a8a;
+  color: #ce3a8b;
   text-decoration: none;
   font-weight: 600;
 }
@@ -152,7 +152,7 @@ button:hover {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #1e3a8a;
+  color: #f9a8d4;
   font-size: 17px;
   cursor: pointer;
   transition: color 0.3s ease;

@@ -52,7 +52,7 @@ body {
   border-radius: 20px;
   box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.25);
   text-align: center;
-  color: #1e3a8a;
+  color: #f9a8d4;
   animation: slideIn 0.8s ease;
 }
 
@@ -61,12 +61,12 @@ body {
   margin-bottom: 10px;
   font-size: 26px;
   letter-spacing: 1px;
-  color: #1e3a8a;
+  color: #ca3085;
 }
 
 .subtitle {
   font-size: 14px;
-  color: #3b82f6;
+  color: #f9a8d4;
   margin-bottom: 25px;
 }
 
@@ -83,7 +83,7 @@ body {
 }
 
 .input-group i {
-  color: #1e3a8a;
+  color: #f9a8d4;
   font-size: 18px;
   margin-right: 10px;
 }
@@ -103,7 +103,7 @@ body {
 
 /* ===== Tombol ===== */
 button {
-  background: linear-gradient(to right, #007bff, #1d4ed8);
+  background: linear-gradient(to right, #f9a8d4, #d62c8a);
   color: white;
   border: none;
   padding: 12px;
@@ -125,17 +125,17 @@ button:hover {
   margin-top: 12px;
   font-size: 14px;
   min-height: 18px;
-  color: #1e293b;
+  color: #bd4285;
 }
 
 .switch-page {
   margin-top: 20px;
   font-size: 14px;
-  color: #334155;
+  color: #f9a8d4;
 }
 
 .switch-page a {
-  color: #1e3a8a;
+  color: #ca2e84;
   text-decoration: none;
   font-weight: 600;
 }
@@ -146,7 +146,7 @@ button:hover {
 
 .toggle-password {
   cursor: pointer;
-  color: #1e3a8a;
+  color: #f9a8d4;
   font-size: 18px;
 }
 
