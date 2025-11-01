@@ -1,90 +1,99 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tiket Wisata Batam | PBL RKS-304</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Wisata Batam</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/854/854878.png" />
-  </head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50 min-h-screen">
+    
+    <!-- HEADER / NAVIGATION -->
+    <header class="relative bg-gradient-to-r from-rose-100 via-orange-100 to-sky-100 backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
+        <div class="flex flex-wrap justify-between items-center px-10 py-5">
+            <div class="flex items-center gap-4">
+                <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Logo" class="w-12 h-12 drop-shadow-md">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">
+                        <span class="text-rose-400">Pesona Destinasi</span> Wisata Batam
+                    </h1>
+                    <p class="text-sm text-gray-600 italic">Temukan dan Booking Destinasi Wisata Favoritmu di Batam 🌺</p>
+                </div>
+            </div>
 
-  <body class="min-h-screen bg-gradient-to-br from-orange-100 via-rose-100 to-amber-100 flex flex-col font-[Poppins] text-gray-700">
+            <nav class="hidden md:flex gap-8 font-medium text-gray-700">
+                <a href="{{ url_for('home') }}" class="relative group">
+                    Beranda
+                    <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-rose-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
+                </a>
+                <a href="#destinasi" class="relative group">
+                    Destinasi
+                    <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-orange-300 to-amber-300 group-hover:w-full transition-all duration-300"></span>
+                </a>
+                <a href="#booking" class="relative group">
+                    Tiket Saya
+                    <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-pink-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
+                </a>
+                <a href="#" class="relative group">
+                    Kontak
+                    <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-sky-300 to-rose-300 group-hover:w-full transition-all duration-300"></span>
+                </a>
+            </nav>
 
-   <!-- 🌴 HEADER -->
-<header class="relative bg-gradient-to-r from-rose-100 via-orange-100 to-sky-100 backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
-  <div class="flex flex-wrap justify-between items-center px-10 py-5">
-    <div class="flex items-center gap-4">
-      <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Logo" class="w-12 h-12 drop-shadow-md">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">
-          <span class="text-rose-400">Pesona Destinasi</span> Wisata Batam
-        </h1>
-        <p class="text-sm text-gray-600 italic">Temukan dan Booking Destinasi Wisata Favoritmu di Batam 🌺</p>
-      </div>
+            <!-- LOGOUT BUTTON -->
+            <a href="{{ url_for('logout') }}"
+               class="bg-gradient-to-r from-pink-300 via-orange-300 to-amber-300 text-white font-semibold px-5 py-2 rounded-xl shadow-md hover:scale-105 hover:shadow-lg transition-all">
+               Logout ({{ username }})
+            </a>
+        </div>
+    </header>
+
+    <!-- WELCOME MESSAGE -->
+    <div class="container mx-auto px-4 mt-8">
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-lg p-6 text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Selamat Datang, {{ username }}! 👋</h1>
+            <p class="text-gray-600">Mari jelajahi keindahan wisata Batam dan pesan tiket favoritmu</p>
+        </div>
     </div>
 
-    <nav class="hidden md:flex gap-8 font-medium text-gray-700">
-      <a href="#" class="relative group">
-        Beranda
-        <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-rose-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
-      </a>
-      <a href="#" class="relative group">
-        Destinasi
-        <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-orange-300 to-amber-300 group-hover:w-full transition-all duration-300"></span>
-      </a>
-      <a href="#" class="relative group">
-        Tiket Saya
-        <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-pink-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
-      </a>
-      <a href="#" class="relative group">
-        Kontak
-        <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-sky-300 to-rose-300 group-hover:w-full transition-all duration-300"></span>
-      </a>
-    </nav>
-
-    <a href="/landing"
-       class="bg-gradient-to-r from-pink-300 via-orange-300 to-amber-300 text-white font-semibold px-5 py-2 rounded-xl shadow-md hover:scale-105 hover:shadow-lg transition-all">
-       Logout
-    </a>
-  </div>
-</header>
-
-    <!-- MAIN -->
+    <!-- MAIN CONTENT -->
     <main class="flex flex-1 flex-col lg:flex-row p-6 gap-6">
 
-      <!-- SIDEBAR -->
-      <aside class="bg-white/80 backdrop-blur-md shadow-xl rounded-2xl p-6 w-full lg:w-1/4 h-fit">
-        <h2 class="text-xl font-semibold text-orange-700 mb-4 text-center">🎟️ Pemesanan Tiket</h2>
+        <!-- SIDEBAR BOOKING -->
+        <aside class="bg-white/80 backdrop-blur-md shadow-xl rounded-2xl p-6 w-full lg:w-1/4 h-fit">
+            <h2 class="text-xl font-semibold text-orange-700 mb-4 text-center">🎟️ Pemesanan Tiket</h2>
 
-        <label class="block mb-2 text-gray-600">Pilih Destinasi</label>
-        <select id="destinasiSelect" class="w-full mb-4 p-2 rounded-lg border focus:ring-2 focus:ring-orange-200">
-          <option value="">-- Pilih Destinasi --</option>
-          <option>Pantai Nongsa</option>
-          <option>Pantai Melayu</option>
-          <option>Pantai Vio-Vio</option>
-          <option>Pantai Elyora</option>
-          <option>Pantai Marina</option>
-          <option>Pantai Melur</option>
-          <option>Taman Rusa</option>
-          <option>Kampung Vietnam</option>
-          <option>Mata Kucing</option>
-          <option>Ocarina Park</option>
-        </select>
+            <label class="block mb-2 text-gray-600">Pilih Destinasi</label>
+            <select id="destinasiSelect" class="w-full mb-4 p-2 rounded-lg border focus:ring-2 focus:ring-orange-200">
+                <option value="">-- Pilih Destinasi --</option>
+                <option>Pantai Nongsa</option>
+                <option>Pantai Melayu</option>
+                <option>Pantai Vio-Vio</option>
+                <option>Pantai Elyora</option>
+                <option>Pantai Marina</option>
+                <option>Pantai Melur</option>
+                <option>Taman Rusa</option>
+                <option>Kampung Vietnam</option>
+                <option>Mata Kucing</option>
+                <option>Ocarina Park</option>
+            </select>
 
-        <label class="block mb-2 text-gray-600">Tanggal Kunjungan</label>
-        <input type="date" id="tanggal" class="w-full mb-4 p-2 rounded-lg border focus:ring-2 focus:ring-amber-200">
+            <label class="block mb-2 text-gray-600">Tanggal Kunjungan</label>
+            <input type="date" id="tanggal" class="w-full mb-4 p-2 rounded-lg border focus:ring-2 focus:ring-amber-200">
 
-        <label class="block mb-2 text-gray-600">Jumlah Tiket</label>
-        <input type="number" id="jumlah" min="1" placeholder="Masukkan jumlah tiket"
-               class="w-full mb-4 p-2 rounded-lg border focus:ring-2 focus:ring-pink-200">
+            <label class="block mb-2 text-gray-600">Jumlah Tiket</label>
+            <input type="number" id="jumlah" min="1" placeholder="Masukkan jumlah tiket"
+                   class="w-full mb-4 p-2 rounded-lg border focus:ring-2 focus:ring-pink-200">
 
-        <p id="previewHarga" class="text-center font-semibold text-orange-500 mb-4"></p>
+            <p id="previewHarga" class="text-center font-semibold text-orange-500 mb-4"></p>
 
-        <button onclick="checkout()"
-                class="w-full bg-gradient-to-r from-orange-300 via-pink-300 to-amber-300 text-white font-bold py-2 rounded-xl hover:scale-105 hover:shadow-lg transition">
-          Checkout
-        </button>
+            <button onclick="checkout()"
+                    class="w-full bg-gradient-to-r from-orange-300 via-pink-300 to-amber-300 text-white font-bold py-2 rounded-xl hover:scale-105 hover:shadow-lg transition">
+                Checkout
+            </button>
 
+<<<<<<< HEAD
         <!-- Hasil Booking -->
         <div id="hasilBox" class="hidden mt-6 bg-white/70 backdrop-blur-md p-4 rounded-lg shadow-inner">
           <pre id="hasilBooking" class="whitespace-pre-line text-gray-700 font-medium"></pre>
@@ -104,108 +113,219 @@
           ⬇️ Download Bukti Pemesanan
         </button>
       </aside>
+=======
+            <!-- Download Button -->
+            <button onclick="downloadBukti()"
+                    class="w-full mt-3 bg-gradient-to-r from-amber-200 via-orange-200 to-pink-200 text-gray-700 font-semibold py-2 rounded-xl hover:scale-105 hover:shadow-md transition">
+                ⬇️ Download Bukti Pemesanan
+            </button>
 
-      <!-- KONTEN UTAMA -->
-      <section class="flex-1">
-        <h2 class="text-2xl font-semibold text-orange-700 mb-4 text-center">🌴 Pilihan Destinasi Wisata</h2>
+            <!-- Upload Bukti Pembayaran -->
+            <div class="mt-4 bg-white/70 backdrop-blur-md p-4 rounded-lg shadow-inner">
+                <h2 class="text-lg font-semibold text-gray-700 mb-2">📤 Upload Bukti Pembayaran</h2>
+                <input type="file" id="buktiPembayaran" accept="image/*"
+                       class="block w-full text-sm text-gray-600 border p-2 rounded-lg cursor-pointer mb-2" />
+                <div id="previewBukti" class="text-center"></div>
+            </div>
 
-        <!-- SEARCH BAR -->
-        <div class="mb-6 flex justify-center">
-          <input type="text" id="searchInput" placeholder="🔍 Cari destinasi..."
-                 class="w-full sm:w-1/2 p-2 border rounded-xl focus:ring-2 focus:ring-orange-200 focus:outline-none text-gray-600" />
-        </div>
+            <!-- Hasil Booking -->
+            <div id="hasilBox" class="hidden mt-6 bg-white/70 backdrop-blur-md p-4 rounded-lg shadow-inner">
+                <pre id="hasilBooking" class="whitespace-pre-line text-gray-700 font-medium"></pre>
+            </div>
+        </aside>
+>>>>>>> 83a3c44da13b29d487ff3101db3a48a60fabc42c
 
-        <div id="destinasiList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- CARD TEMPLATE -->
-          <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-            <img src="static/images/nongsa.jpg" alt="Pantai Nongsa" class="rounded-xl h-48 object-cover mb-3">
-            <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Nongsa</h3>
-            <p class="text-sm text-gray-500 flex-1">Pantai populer untuk bersantai dan menikmati matahari terbenam di Batam.</p>
-            <p class="mt-3 font-bold text-orange-500">Jam Buka: 24 Jam</p>
-            <p class="mt-3 font-bold text-orange-500">Rp10.000</p>
-          </div>
+        <!-- DESTINASI WISATA -->
+        <section class="flex-1">
+            <h2 class="text-2xl font-semibold text-orange-700 mb-4 text-center">🌴 Pilihan Destinasi Wisata</h2>
 
-          <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-            <img src="static/images/melayu.jpg" alt="Pantai Melayu" class="rounded-xl h-48 object-cover mb-3">
-            <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Melayu</h3>
-            <p class="text-sm text-gray-500 flex-1">Pantai luas dengan pasir putih halus dan ombak yang tenang, cocok untuk keluarga.</p>
-            <p class="mt-3 font-bold text-orange-500">Jam Buka: 07.00 - 18.00</p>
-            <p class="mt-3 font-bold text-orange-500">Rp15.000</p>
-          </div>
+            <!-- SEARCH BAR -->
+            <div class="mb-6 flex justify-center">
+                <input type="text" id="searchInput" placeholder="🔍 Cari destinasi..."
+                       class="w-full sm:w-1/2 p-2 border rounded-xl focus:ring-2 focus:ring-orange-200 focus:outline-none text-gray-600" />
+            </div>
 
-          <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-            <img src="static/images/viovio.jpeg" alt="Pantai Vio-Vio" class="rounded-xl h-48 object-cover mb-3">
-            <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Vio-Vio</h3>
-            <p class="text-sm text-gray-500 flex-1">Menawarkan spot foto instagramable dan tempat snorkeling yang indah.</p>
-            <p class="mt-3 font-bold text-orange-500">Jam Buka: 08.00 - 18.00</p>
-            <p class="mt-3 font-bold text-orange-500">Rp10.000</p>
-          </div>
+            <div id="destinasiList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Pantai Nongsa -->
+                <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
+                    <img src="{{ url_for('static', filename='images/nongsa.jpg') }}" alt="Pantai Nongsa" class="rounded-xl h-48 object-cover mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Nongsa</h3>
+                    <p class="text-sm text-gray-500 flex-1">Pantai populer untuk bersantai dan menikmati matahari terbenam di Batam.</p>
+                    <p class="mt-3 font-bold text-orange-500">Jam Buka: 24 Jam</p>
+                    <p class="mt-3 font-bold text-orange-500">Rp10.000</p>
+                </div>
 
-          <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-            <img src="static/images/elyora.jpg" alt="Pantai Elyora" class="rounded-xl h-48 object-cover mb-3">
-            <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Elyora</h3>
-            <p class="text-sm text-gray-500 flex-1">Pantai dengan pemandangan indah dan area perkemahan yang nyaman.</p>
-            <p class="mt-3 font-bold text-orange-500">Jam Buka: 08.00 - 18.00</p>
-            <p class="mt-3 font-bold text-orange-500">Rp10.000</p>
-          </div>
+                <!-- Pantai Melayu -->
+                <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
+                    <img src="{{ url_for('static', filename='images/melayu.jpg') }}" alt="Pantai Melayu" class="rounded-xl h-48 object-cover mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Melayu</h3>
+                    <p class="text-sm text-gray-500 flex-1">Pantai luas dengan pasir putih halus dan ombak yang tenang, cocok untuk keluarga.</p>
+                    <p class="mt-3 font-bold text-orange-500">Jam Buka: 07.00 - 18.00</p>
+                    <p class="mt-3 font-bold text-orange-500">Rp15.000</p>
+                </div>
 
-          <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-            <img src="static/images/marina.jpeg" alt="Pantai Marina" class="rounded-xl h-48 object-cover mb-3">
-            <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Marina</h3>
-            <p class="text-sm text-gray-500 flex-1">Tempat wisata dengan taman dan spot foto modern di pinggir pantai.</p>
-            <p class="mt-3 font-bold text-orange-500">Jam Buka: 07.00 - 19.00</p>
-            <p class="mt-3 font-bold text-orange-500">Rp20.000</p>
-          </div>
+                <!-- Pantai Vio-Vio -->
+                <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
+                    <img src="{{ url_for('static', filename='images/viovio.jpeg') }}" alt="Pantai Vio-Vio" class="rounded-xl h-48 object-cover mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Vio-Vio</h3>
+                    <p class="text-sm text-gray-500 flex-1">Menawarkan spot foto instagramable dan tempat snorkeling yang indah.</p>
+                    <p class="mt-3 font-bold text-orange-500">Jam Buka: 08.00 - 18.00</p>
+                    <p class="mt-3 font-bold text-orange-500">Rp10.000</p>
+                </div>
 
-          <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-            <img src="static/images/melur.jpeg" alt="Pantai Melur" class="rounded-xl h-48 object-cover mb-3">
-            <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Melur</h3>
-            <p class="text-sm text-gray-500 flex-1">Pantai dengan pasir putih dan suasana alami, cocok untuk liburan santai.</p>
-            <p class="mt-3 font-bold text-orange-500">Jam Buka: 24 Jam</p>
-            <p class="mt-3 font-bold text-orange-500">Rp5.000</p>
-          </div>
+                <!-- Pantai Elyora -->
+                <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
+                    <img src="{{ url_for('static', filename='images/elyora.jpg') }}" alt="Pantai Elyora" class="rounded-xl h-48 object-cover mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Elyora</h3>
+                    <p class="text-sm text-gray-500 flex-1">Pantai dengan pemandangan indah dan area perkemahan yang nyaman.</p>
+                    <p class="mt-3 font-bold text-orange-500">Jam Buka: 08.00 - 18.00</p>
+                    <p class="mt-3 font-bold text-orange-500">Rp10.000</p>
+                </div>
 
-          <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-            <img src="static/images/tamanrusa.jpeg" alt="Taman Rusa" class="rounded-xl h-48 object-cover mb-3">
-            <h3 class="text-lg font-semibold text-gray-800 mb-1">Taman Rusa</h3>
-            <p class="text-sm text-gray-500 flex-1">Tempat wisata edukatif dengan rusa dan area jogging yang sejuk.</p>
-            <p class="mt-3 font-bold text-orange-500">Jam Buka: 07.00 - 18.00</p>
-            <p class="mt-3 font-bold text-orange-500">Rp5.000</p>
-          </div>
+                <!-- Pantai Marina -->
+                <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
+                    <img src="{{ url_for('static', filename='images/marina.jpeg') }}" alt="Pantai Marina" class="rounded-xl h-48 object-cover mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Marina</h3>
+                    <p class="text-sm text-gray-500 flex-1">Tempat wisata dengan taman dan spot foto modern di pinggir pantai.</p>
+                    <p class="mt-3 font-bold text-orange-500">Jam Buka: 07.00 - 19.00</p>
+                    <p class="mt-3 font-bold text-orange-500">Rp20.000</p>
+                </div>
 
-          <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-            <img src="static/images/kmpgvietnam.jpeg" alt="Kampung Vietnam" class="rounded-xl h-48 object-cover mb-3">
-            <h3 class="text-lg font-semibold text-gray-800 mb-1">Kampung Vietnam</h3>
-            <p class="text-sm text-gray-500 flex-1">Situs sejarah peninggalan pengungsi Vietnam dengan suasana klasik.</p>
-            <p class="mt-3 font-bold text-orange-500">Jam Buka: 08.00 - 17.00</p>
-            <p class="mt-3 font-bold text-orange-500">Rp20.000</p>
-          </div>
+                <!-- Pantai Melur -->
+                <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
+                    <img src="{{ url_for('static', filename='images/melur.jpeg') }}" alt="Pantai Melur" class="rounded-xl h-48 object-cover mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Pantai Melur</h3>
+                    <p class="text-sm text-gray-500 flex-1">Pantai dengan pasir putih dan suasana alami, cocok untuk liburan santai.</p>
+                    <p class="mt-3 font-bold text-orange-500">Jam Buka: 24 Jam</p>
+                    <p class="mt-3 font-bold text-orange-500">Rp5.000</p>
+                </div>
 
-          <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-            <img src="static/images/matakucing.jpeg" alt="Mata Kucing" class="rounded-xl h-48 object-cover mb-3">
-            <h3 class="text-lg font-semibold text-gray-800 mb-1">Mata Kucing</h3>
-            <p class="text-sm text-gray-500 flex-1">Kawasan wisata alam dengan kolam renang, hutan, dan taman bermain.</p>
-            <p class="mt-3 font-bold text-orange-500">Jam Buka: 08.00 - 17.00</p>
-            <p class="mt-3 font-bold text-orange-500">Rp10.000</p>
-          </div>
+                <!-- Taman Rusa -->
+                <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
+                    <img src="{{ url_for('static', filename='images/tamanrusa.jpeg') }}" alt="Taman Rusa" class="rounded-xl h-48 object-cover mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Taman Rusa</h3>
+                    <p class="text-sm text-gray-500 flex-1">Tempat wisata edukatif dengan rusa dan area jogging yang sejuk.</p>
+                    <p class="mt-3 font-bold text-orange-500">Jam Buka: 07.00 - 18.00</p>
+                    <p class="mt-3 font-bold text-orange-500">Rp5.000</p>
+                </div>
 
-          <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-            <img src="static/images/ocarina.jpeg" alt="Ocarina" class="rounded-xl h-48 object-cover mb-3">
-            <h3 class="text-lg font-semibold text-gray-800 mb-1">Ocarina Park</h3>
-            <p class="text-sm text-gray-500 flex-1">Taman hiburan keluarga dengan wahana modern di tepi laut Batam.</p>
-            <p class="mt-3 font-bold text-orange-500">Jam Buka: 09.00 - 21.00</p>
-            <p class="mt-3 font-bold text-orange-500">Rp25.000</p>
-          </div>
-        </div>
-      </section>
+                <!-- Kampung Vietnam -->
+                <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
+                    <img src="{{ url_for('static', filename='images/kmpgvietnam.jpeg') }}" alt="Kampung Vietnam" class="rounded-xl h-48 object-cover mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Kampung Vietnam</h3>
+                    <p class="text-sm text-gray-500 flex-1">Situs sejarah peninggalan pengungsi Vietnam dengan suasana klasik.</p>
+                    <p class="mt-3 font-bold text-orange-500">Jam Buka: 08.00 - 17.00</p>
+                    <p class="mt-3 font-bold text-orange-500">Rp20.000</p>
+                </div>
+
+                <!-- Mata Kucing -->
+                <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
+                    <img src="{{ url_for('static', filename='images/matakucing.jpeg') }}" alt="Mata Kucing" class="rounded-xl h-48 object-cover mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Mata Kucing</h3>
+                    <p class="text-sm text-gray-500 flex-1">Kawasan wisata alam dengan kolam renang, hutan, dan taman bermain.</p>
+                    <p class="mt-3 font-bold text-orange-500">Jam Buka: 08.00 - 17.00</p>
+                    <p class="mt-3 font-bold text-orange-500">Rp10.000</p>
+                </div>
+
+                <!-- Ocarina Park -->
+                <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
+                    <img src="{{ url_for('static', filename='images/ocarina.jpeg') }}" alt="Ocarina" class="rounded-xl h-48 object-cover mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Ocarina Park</h3>
+                    <p class="text-sm text-gray-500 flex-1">Taman hiburan keluarga dengan wahana modern di tepi laut Batam.</p>
+                    <p class="mt-3 font-bold text-orange-500">Jam Buka: 09.00 - 21.00</p>
+                    <p class="mt-3 font-bold text-orange-500">Rp25.000</p>
+                </div>
+            </div>
+        </section>
     </main>
 
-   <!-- FOOTER -->
-    <footer class="text-center py-4 text-gray-500 text-sm">
-      © 2025 Tiket Wisata Batam | Dibuat oleh Tim PBL RKS-304
+    <!-- FOOTER -->
+    <footer class="text-center py-4 text-gray-500 text-sm mt-8">
+        © 2025 Tiket Wisata Batam | Dibuat oleh Tim PBL RKS-304
     </footer>
 
-    <script src="../static/js/jss.js"></script>
+    <!-- SCRIPTS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<<<<<<< HEAD
+=======
+    <script>
+        let sudahCheckout = false;
+        let sudahUpload = false;
+
+        function checkout() {
+            const destinasi = document.getElementById("destinasiSelect").value;
+            const tanggal = document.getElementById("tanggal").value;
+            const jumlah = document.getElementById("jumlah").value;
+
+            if (!destinasi || !tanggal || !jumlah) {
+                alert("⚠️ Lengkapi semua data pemesanan!");
+                return;
+            }
+
+            const hargaList = {
+                "Pantai Nongsa": 10000,
+                "Pantai Melayu": 15000,
+                "Pantai Vio-Vio": 10000,
+                "Pantai Elyora": 10000,
+                "Pantai Marina": 20000,
+                "Pantai Melur": 5000,
+                "Taman Rusa": 5000,
+                "Kampung Vietnam": 20000,
+                "Mata Kucing": 10000,
+                "Ocarina Park": 25000,
+            };
+
+            const harga = hargaList[destinasi] || 0;
+            const total = harga * jumlah;
+
+            document.getElementById("hasilBooking").innerText =
+                `Bukti Pemesanan Tiket Wisata\n\n` +
+                `Destinasi: ${destinasi}\n` +
+                `Tanggal: ${tanggal}\n` +
+                `Jumlah Tiket: ${jumlah}\n` +
+                `Harga per Tiket: Rp${harga.toLocaleString()}\n` +
+                `Total Bayar: Rp${total.toLocaleString()}`;
+
+            document.getElementById("hasilBox").classList.remove("hidden");
+            sudahCheckout = true;
+            alert("✅ Checkout berhasil! Silakan upload bukti pembayaran.");
+        }
+
+        document.getElementById("buktiPembayaran").addEventListener("change", (e) => {
+            if (e.target.files.length > 0) {
+                const fileName = e.target.files[0].name;
+                document.getElementById("previewBukti").innerHTML =
+                    `<p class='text-sm text-orange-600'>📎 ${fileName} berhasil diunggah.</p>`;
+                sudahUpload = true;
+            }
+        });
+
+        function downloadBukti() {
+            if (!sudahCheckout) {
+                alert("⚠️ Silakan lakukan checkout terlebih dahulu!");
+                return;
+            }
+            if (!sudahUpload) {
+                alert("⚠️ Silakan upload bukti pembayaran terlebih dahulu!");
+                return;
+            }
+            const hasil = document.getElementById("hasilBooking").innerText;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(hasil, 10, 10);
+            doc.save("Bukti_Pemesanan.pdf");
+            alert("✅ Bukti pemesanan berhasil diunduh!");
+        }
+
+        document.getElementById("searchInput").addEventListener("input", function() {
+            const query = this.value.toLowerCase();
+            const cards = document.querySelectorAll(".destinasi-card");
+            cards.forEach(card => {
+                const title = card.querySelector("h3").innerText.toLowerCase();
+                card.style.display = title.includes(query) ? "flex" : "none";
+            });
+        });
+    </script>
+>>>>>>> 83a3c44da13b29d487ff3101db3a48a60fabc42c
 </body>
 </html>

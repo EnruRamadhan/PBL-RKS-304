@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register</title>
-
-  <!-- ✅ Gunakan url_for() agar Flask tahu lokasi file -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
@@ -14,24 +12,26 @@
     <div class="register-card">
       <h2>Register</h2>
       <p class="subtitle">Buat akun baru untuk booking destinasi</p>
-      <form id="registerForm">
+      
+      <!-- PERBAIKI: tambah method="POST" dan name attributes -->
+      <form id="registerForm" method="POST" action="/register">
         <div class="input-group">
           <i class="fa fa-user"></i>
-          <input type="text" id="regUsername" placeholder="Username" required>
+          <input type="text" id="regUsername" name="username" placeholder="Username" required>
         </div>
         <div class="input-group">
           <i class="fa fa-envelope"></i>
-          <input type="email" id="regEmail" placeholder="Email" required>
+          <input type="email" id="regEmail" name="email" placeholder="Email" required>
         </div>
         <div class="input-group password-wrapper">
           <i class="fas fa-lock"></i>
-          <input type="password" id="regPassword" placeholder="Password" required>
+          <input type="password" id="regPassword" name="password" placeholder="Password" required>
           <i class="fa-solid fa-eye" id="toggleRegPassword"></i>
         </div>
 
         <div class="input-group password-wrapper">
           <i class="fas fa-lock"></i>
-          <input type="password" id="regConfirm" placeholder="Konfirmasi Password" required>
+          <input type="password" id="regConfirm" name="confirm_password" placeholder="Konfirmasi Password" required>
           <i class="fa-solid fa-eye" id="toggleRegConfirm"></i>
         </div>
 
@@ -39,14 +39,10 @@
         <p id="registerMessage"></p>
       </form>
 
-      <!-- ✅ gunakan url_for untuk pindah ke route /login -->
       <p class="switch-page">Sudah punya akun? 
         <a href="{{ url_for('login') }}">Login</a>
       </p>
     </div>
   </div>
-
-  <!-- ✅ Gunakan url_for() untuk file JS -->
-  <script src="{{ url_for('static', filename='js/register.js') }}"></script>
 </body>
 </html>
