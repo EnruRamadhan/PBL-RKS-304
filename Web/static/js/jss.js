@@ -85,9 +85,9 @@ function downloadBukti() {
   const tanggal = tanggalRaw !== "-" 
     ? new Date(tanggalRaw).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) 
     : "-";
-  const jumlahTiket = document.getElementById("jumlahTiket")?.value || "-";
-  const hargaTiket = document.getElementById("hargaTiket")?.value || "-";
-  const totalBayar = jumlahTiket && hargaTiket ? jumlahTiket * hargaTiket : "-";
+  const jumlahTiket = parseInt(document.getElementById("jumlah")?.value) || 0;
+const hargaTiket = hargaList[destinasi] || 0;
+const totalBayar = hargaTiket * jumlahTiket;
 
   if (!window.jspdf) {
     alert("⚠️ jsPDF belum ter-load!");
