@@ -203,7 +203,6 @@ if __name__ == '__main__':
     if test_connection():
         print("Initializing database...")
         init_database()
-        print("📱 Website: http://localhost:5000")
         print("📱 Alternative: http://127.0.0.1:5000")
         print("⚡ Debug mode: ON")
         app.run(host='0.0.0.0', port=5000, debug=True)
