@@ -187,6 +187,12 @@ def register():
                 error = "Tidak dapat terhubung ke database"
 
     return render_template('register.html', error=error)
+
+# Kontak
+@app.route('/kontak')
+def kontak():
+    return render_template('kontak.html')
+
 # Logout
 @app.route('/logout')
 def logout():

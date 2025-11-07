@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kontak - Pesona Destinasi Wisata Batam</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/kontak.css') }}" />
+</head>
+
+<body>
+  <main class="container">
+    <section class="contact-wrap">
+      <!-- Kartu utama: kontak & form -->
+      <aside class="card">
+        <h3>📞 Kontak Kami</h3>
+        <p class="small">
+          Butuh bantuan pemesanan tiket atau info destinasi? Hubungi kami — tim Pesona Destinasi siap membantu.
+        </p>
+
+        <div class="info-row">
+          <div class="icon">📍</div>
+          <div class="meta">
+            <b>Alamat</b>
+            Politeknik Negeri Batam, Jl. Ahmad Yani, Batam Centre, Kepulauan Riau
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="icon">✉️</div>
+          <div class="meta">
+            <b>Email</b>
+            pesonadestinasi.batam@gmail.com
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="icon">💬</div>
+          <div class="meta">
+            <b>WhatsApp</b>
+            +62-812 3456 7890
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="icon">⏰</div>
+          <div class="meta">
+            <b>Jam Operasional</b>
+            Senin - Minggu, 08.00 - 18.00 WIB
+          </div>
+        </div>
+
+        <hr />
+
+        <form class="contact-form" action="#" method="POST" onsubmit="handleSubmit(event)">
+          <label for="name">Nama</label>
+          <input id="name" name="name"/>
+
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email"/>
+
+          <label for="phone">No. WhatsApp</label>
+          <input id="phone" name="phone"/>
+
+          <label for="subject">Perihal</label>
+          <select id="subject" name="subject">
+            <option>Pertanyaan umum</option>
+            <option>Reservasi & Pembayaran</option>
+            <option>Laporan masalah</option>
+            <option>Kerjasama / Sponsor</option>
+          </select>
+
+          <label for="message">Pesan</label>
+          <textarea id="message" name="message" placeholder="Tuliskan pesanmu..." required></textarea>
+
+          <div class="button-row">
+            <button type="submit" class="btn btn-cta">Kirim Pesan</button>
+            <button type="reset" class="btn btn-outline">Reset</button>
+          </div>
+        </form>
+
+        <p class="note">
+          Kami akan membalas dalam 1x24 jam kerja. Untuk bantuan cepat, silakan hubungi WhatsApp kami.
+        </p>
+
+        <!-- Tombol kembali ke home -->
+        <div class="back-home">
+          <a href="{{ url_for('index_page') }}" class="btn btn-outline">🏠 Kembali ke Beranda</a>
+        </div>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>
