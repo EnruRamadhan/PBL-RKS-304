@@ -35,7 +35,7 @@
                     Tiket Saya
                     <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-pink-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
                 </a>
-                <a href="#" class="relative group">
+                <a href="{{ url_for('kontak') }}" class="relative group">
                     Kontak
                     <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-sky-300 to-rose-300 group-hover:w-full transition-all duration-300"></span>
                 </a>
@@ -44,7 +44,7 @@
             <!-- LOGOUT BUTTON -->
             <a href="{{ url_for('logout') }}"
                class="bg-gradient-to-r from-pink-300 via-orange-300 to-amber-300 text-white font-semibold px-5 py-2 rounded-xl shadow-md hover:scale-105 hover:shadow-lg transition-all">
-               Logout ({{ username }})
+               Logout 
             </a>
         </div>
     </header>
@@ -234,7 +234,7 @@
             const jumlah = document.getElementById("jumlah").value;
 
             if (!destinasi || !tanggal || !jumlah) {
-                alert("⚠️ Lengkapi semua data pemesanan!");
+                alert("Lengkapi semua data pemesanan!");
                 return;
             }
 
@@ -264,7 +264,7 @@
 
             document.getElementById("hasilBox").classList.remove("hidden");
             sudahCheckout = true;
-            alert("✅ Checkout berhasil! Silakan upload bukti pembayaran.");
+            alert("Checkout berhasil! Silakan upload bukti pembayaran.");
         }
 
         document.getElementById("buktiPembayaran").addEventListener("change", (e) => {
@@ -278,11 +278,11 @@
 
         function downloadBukti() {
             if (!sudahCheckout) {
-                alert("⚠️ Silakan lakukan checkout terlebih dahulu!");
+                alert("Silakan lakukan checkout terlebih dahulu!");
                 return;
             }
             if (!sudahUpload) {
-                alert("⚠️ Silakan upload bukti pembayaran terlebih dahulu!");
+                alert("Silakan upload bukti pembayaran terlebih dahulu!");
                 return;
             }
             const hasil = document.getElementById("hasilBooking").innerText;
@@ -290,7 +290,7 @@
             const doc = new jsPDF();
             doc.text(hasil, 10, 10);
             doc.save("Bukti_Pemesanan.pdf");
-            alert("✅ Bukti pemesanan berhasil diunduh!");
+            alert("Bukti pemesanan berhasil diunduh!");
         }
 
         document.getElementById("searchInput").addEventListener("input", function() {
