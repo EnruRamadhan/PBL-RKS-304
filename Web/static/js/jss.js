@@ -32,11 +32,12 @@ function updateTotalHarga() {
 
 // 🧾 Checkout
 function checkout() {
+  const namaPemesan = document.getElementById("namaPemesan").value.trim();
   const destinasi = document.getElementById("destinasiSelect").value;
   const tanggal = document.getElementById("tanggal").value;
   const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
 
-  if (!destinasi || !tanggal || jumlah < 1) {
+  if (!namaPemesan || !destinasi || !tanggal || jumlah < 1) {
     alert("⚠️ Lengkapi semua data pemesanan!");
     return;
   }
@@ -44,8 +45,11 @@ function checkout() {
   const harga = hargaList[destinasi] || 0;
   const total = harga * jumlah;
 
+  localStorage.setItem("namaUser", namaPemesan);
+
   document.getElementById("hasilBooking").innerText =
     `Bukti Pemesanan Tiket Wisata\n\n` +
+    `Nama Pemesan: ${namaPemesan}\n` +
     `Destinasi: ${destinasi}\n` +
     `Tanggal: ${tanggal}\n` +
     `Jumlah Tiket: ${jumlah}\n` +
@@ -79,7 +83,7 @@ function downloadBukti() {
   }
 
   // 🧾 Ambil data user & form
-  const namaUser = localStorage.getItem("namaUser") || "Nama Pemesan";
+  const namaUser = localStorage.getItem("namaUser")?.trim() || "Nama Pemesan";
   const destinasi = document.getElementById("destinasiSelect")?.value || "-";
   const tanggalRaw = document.getElementById("tanggal")?.value || "-";
   const tanggal = tanggalRaw !== "-" 
@@ -174,17 +178,13 @@ function downloadBukti() {
   doc.line(20, 280, 190, 280);
   doc.setFontSize(10);
   doc.setTextColor(234, 84, 128);
-  doc.text("© 2025 Batam Travel | Sistem Pemesanan Wisata RKS", 105, 287, {
+  doc.text("PBL RKS-304 | Sistem Informasi Destinasi Wisata", 105, 287, {
     align: "center",
   });
 
   // 💾 Simpan PDF
   const namaFile = `Bukti_Pemesanan_${destinasi.replace(/\s+/g, "_")}.pdf`;
   doc.save(namaFile);
-  alert("✅ Bukti pemesanan berhasil diunduh!");
- 
-  // Download PDF
-  doc.save(`Bukti_Pemesanan_${namaUser.replace(/\s+/g, "_")}.pdf`);
   alert("✅ Bukti pemesanan berhasil diunduh!");
 }
 
