@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import mysql.connector
 import bcrypt
 
@@ -187,6 +187,69 @@ def register():
                 error = "Tidak dapat terhubung ke database"
 
     return render_template('register.html', error=error)
+
+@app.route("/checkout", methods=["POST"])
+def checkout():
+    if "user_id" not in session:
+        return jsonify({"error": "Not logged in"}), 401
+
+    data = request.get_json()
+    nama_tiket = data.get("nama_tiket")
+    jumlah = data.get("jumlah")
+    harga = data.get("harga")
+    user_id = session["user_id"]
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            INSERT INTO tiket (user_id, nama_tiket, jumlah, harga)
+            VALUES (%s, %s, %s, %s)
+        """, (user_id, nama_tiket, jumlah, harga))
+
+        conn.commit()
+
+        return jsonify({"status": "success", "message": "Tiket berhasil disimpan"})
+
+    except Exception as e:
+        print("❌ ERROR simpan tiket:", e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route("/tiket")
+def tiket_saya():
+    # Cek apakah user sudah login
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+
+    user_id = session.get("user_id")
+
+    conn = get_db()
+    tickets = []
+
+    if conn:
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("""
+                SELECT id_tiket, nama_tiket, tanggal_pembelian, jumlah, harga, total
+                FROM tiket
+                WHERE user_id = %s
+                ORDER BY tanggal_pembelian DESC
+            """, (user_id,))
+            tickets = cursor.fetchall()
+
+        except mysql.connector.Error as err:
+            print("❌ Error mengambil tiket:", err)
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    return render_template("tiket.html", tickets=tickets)
 
 # Kontak
 @app.route('/kontak')

@@ -58,6 +58,27 @@ function checkout() {
 
   document.getElementById("hasilBox").classList.remove("hidden");
   sudahCheckout = true;
+
+  // === Kirim ke backend Flask ===
+  fetch("/checkout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      nama_tiket: destinasi,
+      jumlah: jumlah,
+      harga: harga
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Berhasil simpan ke database:", data);
+  })
+  .catch(err => {
+    console.error("Error kirim ke server:", err);
+  });
+
   alert("✅ Checkout berhasil! Silakan upload bukti pembayaran.");
 }
 

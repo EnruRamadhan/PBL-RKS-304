@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiket Saya</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tiket.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+    <header>
+        <nav class="navbar">
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Tiket Saya <span class="emoji">🎟️</span></h1>
+        <p class="subtitle">Berikut adalah tiket perjalanan yang telah kamu pesan.</p>
+
+        {% if tickets|length == 0 %}
+        <div class="empty-box">
+            <i class="fa-solid fa-ticket"></i>
+            <p>Kamu belum memiliki tiket apapun.</p>
+            <a href="{{ url_for('index_page') }}" class="go-book"> Mulai Booking Destinasi</a>
+        </div>
+        {% else %}
+
+        <div class="ticket-list">
+            {% for t in tickets %}
+            <div class="ticket-card">
+                <div class="ticket-info">
+                    <h2>{{ t.nama_tiket }}</h2>
+                    <p><strong>Tanggal:</strong> {{ t.tanggal_pembelian }}</p>
+                    <p><strong>Jumlah:</strong> {{ t.jumlah }} orang</p>
+                    <p><strong>Total:</strong> Rp {{ t.total }}</p>
+                </div>
+
+                <div class="ticket-actions">
+                    <a href="/download_ticket/{{ t.id_tiket }}" class="btn-download">
+                        <i class="fa-solid fa-download"></i> Download PDF
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% endif %}
+    </div>
+
+</body>
+</html>
