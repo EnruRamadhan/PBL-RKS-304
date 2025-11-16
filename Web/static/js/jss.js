@@ -68,7 +68,8 @@ function checkout() {
     body: JSON.stringify({
       nama_tiket: destinasi,
       jumlah: jumlah,
-      harga: harga
+      harga: harga,
+      tanggal: tanggal
     })
   })
   .then(res => res.json())

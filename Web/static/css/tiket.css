@@ -1,12 +1,59 @@
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    width: 70px;
+}
+
+.nav-title h1 {
+    margin: 0;
+    font-size: 22px;
+    color: #e56b6f;
+}
+
+.nav-title span {
+    color: #333;
+}
+
+.nav-title p {
+    margin: 0;
+    font-size: 14px;
+    color: #4a4a4a;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 25px;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+.nav-menu a.active {
+    color: #e56b6f;
+    font-weight: bold;
+}
+
+.btn-logout {
+    padding: 8px 20px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #fda4af, #fcd34d);
+    color: white !important;
+    text-decoration: none;
+    font-weight: bold;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     background: #faf8ff;
     margin: 0;
-}
-
-.navbar {
-    background: linear-gradient(to right, #ffe5d9, #e8f0ff);
-    padding: 18px 40px;
 }
 
 .navbar ul {
@@ -31,6 +78,7 @@ body {
     max-width: 900px;
     margin: 40px auto;
     padding: 20px;
+    margin-top: 30px !important;
 }
 
 h1 {
@@ -93,4 +141,32 @@ h1 {
     color: white;
     border-radius: 8px;
     text-decoration: none;
+}
+
+/* BANNER BAGIAN ATAS "Tiket Saya" */
+.banner-tiket {
+    width: 90%;
+    margin: 30px auto;
+    padding: 40px 50px;
+    background: linear-gradient(to right, #d7e2f7, #fdeedb, #f3e0fd);
+    border-radius: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255,255,255,0.6);
+}
+
+.banner-tiket h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #444;
+    margin: 0;
+}
+
+.banner-tiket .emoji {
+    font-size: 34px;
+}
+
+.banner-tiket .subtitle {
+    color: #666;
+    margin-top: 8px;
+    font-size: 15px;
 }

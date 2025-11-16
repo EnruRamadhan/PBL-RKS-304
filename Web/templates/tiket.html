@@ -4,20 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiket Saya</title>
-
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tiket.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
+    <!-- HEADER / NAVIGATION -->
+    <header class="relative bg-gradient-to-r from-rose-100 via-orange-100 to-sky-100 backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
+        <div class="flex flex-wrap justify-between items-center px-10 py-5">
+            <div class="flex items-center gap-4">
+                <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Logo" class="w-12 h-12 drop-shadow-md">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">
+                        <span class="text-rose-400">Pesona Destinasi</span> Wisata Batam
+                    </h1>
+                    <p class="text-sm text-gray-600 italic">Temukan dan Booking Destinasi Wisata Favoritmu di Batam 🌺</p>
+                </div>
+            </div>
 
-    <header>
-        <nav class="navbar">
-        </nav>
+            <nav class="hidden md:flex gap-8 font-medium text-gray-700">
+                <a href="{{ url_for('home') }}" class="relative group">
+                    Beranda
+                    <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-rose-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
+                </a>
+                <a href="#destinasi" class="relative group">
+                    Destinasi
+                    <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-orange-300 to-amber-300 group-hover:w-full transition-all duration-300"></span>
+                </a>
+                <a href="{{ url_for('tiket_saya') }}" class="relative group">
+                    Tiket Saya
+                    <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-pink-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
+                </a>
+                <a href="{{ url_for('kontak') }}" class="relative group">
+                    Kontak
+                    <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-sky-300 to-rose-300 group-hover:w-full transition-all duration-300"></span>
+                </a>
+            </nav>
+
+            <!-- LOGOUT BUTTON -->
+            <a href="{{ url_for('logout') }}"
+               class="bg-gradient-to-r from-pink-300 via-orange-300 to-amber-300 text-white font-semibold px-5 py-2 rounded-xl shadow-md hover:scale-105 hover:shadow-lg transition-all">
+               Logout 
+            </a>
+        </div>
     </header>
 
-    <div class="container">
+    <div class="banner-tiket">
         <h1>Tiket Saya <span class="emoji">🎟️</span></h1>
         <p class="subtitle">Berikut adalah tiket perjalanan yang telah kamu pesan.</p>
 
@@ -34,9 +68,28 @@
             <div class="ticket-card">
                 <div class="ticket-info">
                     <h2>{{ t.nama_tiket }}</h2>
-                    <p><strong>Tanggal:</strong> {{ t.tanggal_pembelian }}</p>
+
+                    <p><strong>Tanggal Kunjungan:</strong> 
+                        {% if t.tanggal_kunjungan %}
+                            {{ t.tanggal_kunjungan.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            Tanggal tidak tersedia
+                        {% endif %}
+                    </p>
+
+                    <p><strong>Tanggal Pembelian:</strong> 
+                        {% if t.tanggal_pembelian %}
+                            {{ t.tanggal_pembelian.strftime('%d/%m/%Y %H:%M:%S') }}
+                        {% else %}
+                            Waktu tidak tersedia
+                        {% endif %}
+                        </p>
+
                     <p><strong>Jumlah:</strong> {{ t.jumlah }} orang</p>
-                    <p><strong>Total:</strong> Rp {{ t.total }}</p>
+
+                    <p><strong>Total:</strong> 
+                        Rp {{ "{:,}".format(t.total).replace(",", ".") }}
+                    </p>
                 </div>
 
                 <div class="ticket-actions">

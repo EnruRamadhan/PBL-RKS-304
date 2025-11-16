@@ -1,3 +1,5 @@
+from datetime import datetime
+import pytz
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import mysql.connector
@@ -85,72 +87,100 @@ def landing():
 # Home page setelah login
 @app.route('/home')
 def home():
-    if 'user_id' not in session or not session.get('logged_in'):
+    if 'pelanggan_id' not in session or not session.get('logged_in'):
         print("❌ User not logged in, redirecting to login")
         return redirect(url_for('login'))
     
-    print(f"✅ User {session['user_name']} accessing home")
-    return render_template('index.html', username=session.get('user_name'))
+    print(f"✅ User {session['pelanggan_username']} accessing home")
+    return render_template('index.html', username=session.get('pelanggan_username'))
 
 # Index page (alias untuk home) - GUNAKAN ENDPOINT NAME YANG BERBEDA
 @app.route('/index')
 def index_page():  # GANTI NAMA FUNCTION INI
-    if 'user_id' not in session or not session.get('logged_in'):
+    if 'pelanggan_id' not in session or not session.get('logged_in'):
         print("❌ User not logged in, redirecting to login")
         return redirect(url_for('login'))
     
-    print(f"✅ User {session['user_name']} accessing index")
-    return render_template('index.html', username=session.get('user_name'))
+    print(f"✅ User {session['pelanggan_username']} accessing index")
+    return render_template('index.html', username=session.get('pelanggan_username'))
 
-# Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
 
-        print(f"🔍 Login attempt - Username: {username}")
+    if request.method == "POST":
+        username = request.form.get("username").strip()
+        password = request.form.get("password")
+
+        print(f"🔍 Login attempt: {username}")
 
         conn = get_db()
         if conn:
-            cursor = conn.cursor(dictionary=True)
+            cursor = conn.cursor(dictionary=True, buffered=True)
+
             try:
-                # gunakan nama kolom yang ada: id_pelanggan sebagai id
-                cursor.execute("SELECT id_pelanggan AS id, username, password FROM pelanggan WHERE username = %s", (username,))
-                user = cursor.fetchone()
-                
-                if user:
-                    print(f"🔍 User found: {user['username']}")
-                    if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
-                        session['user_id'] = user['id']
-                        session['user_name'] = user['username']
-                        session['logged_in'] = True
-                        
-                        print(f"✅ Login successful - User: {user['username']}")
-                        return redirect(url_for('home'))
+                # 🔎 1. Cek dulu apakah dia ADMIN
+                cursor.execute("SELECT * FROM admin WHERE username=%s", (username,))
+                admin = cursor.fetchone()
+
+                if admin:
+                    print("🔍 Admin found:", admin["username"])
+
+                    if bcrypt.checkpw(password.encode("utf-8"), admin["password"].encode("utf-8")):
+                        # 🎉 Login admin OK
+                        session.clear()
+                        session["admin_id"] = admin["id_admin"]
+                        session["admin_username"] = admin["username"]
+                        session["admin_role"] = admin["role"]
+                        session["logged_in_admin"] = True
+
+                        print("✅ ADMIN LOGIN SUCCESS:", admin["username"])
+                        return redirect(url_for("admin_index"))  # buat halaman admin nanti
                     else:
-                        error = "Password salah."
+                        error = "Password admin salah!"
+                        return render_template("login.html", error=error)
+
+                # 🔎 2. Jika bukan admin → cek sebagai pelanggan
+                cursor.execute(
+                    "SELECT id_pelanggan, username, password FROM pelanggan WHERE username=%s",
+                    (username,)
+                )
+                user = cursor.fetchone()
+
+                if user:
+                    print("🔍 Pelanggan found:", user["username"])
+
+                    if bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
+                        session.clear()
+                        session["pelanggan_id"] = user["id_pelanggan"]
+                        session["pelanggan_username"] = user["username"]
+                        session["logged_in"] = True
+
+                        print("✅ Pelanggan login success:", user["username"])
+                        return redirect(url_for("home"))
+
+                    else:
+                        error = "Password salah!"
                 else:
                     error = "Username tidak ditemukan."
+
             except mysql.connector.Error as err:
+                print("❌ Database error:", err)
                 error = f"Database error: {err}"
-                print(f"❌ Database error: {err}")
+
             finally:
                 cursor.close()
                 conn.close()
-        else:
-            error = "Tidak dapat terhubung ke database"
 
-    return render_template('login.html', error=error)
+    return render_template("login.html", error=error)
 
-# Register
+# Register Pelanggan
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     error = None
     if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
+        username = request.form.get('username').strip()
+        email = request.form.get('email').strip()
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
 
@@ -166,22 +196,21 @@ def register():
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             conn = get_db()
             if conn:
-                cursor = conn.cursor()
                 try:
-                    # pelanggan.nama wajib -> pakai username sebagai nama default
-                    cursor.execute(
-                        "INSERT INTO pelanggan (nama, username, email, password) VALUES (%s, %s, %s, %s)",
-                        (username, username, email, hashed_password)
-                    )
-                    conn.commit()
-                    return redirect(url_for('login'))
+                    with conn.cursor() as cursor:
+                        cursor.execute(
+                            "INSERT INTO pelanggan (nama, username, email, password) VALUES (%s, %s, %s, %s)",
+                            (username, username, email, hashed_password)
+                        )
+                        conn.commit()
+                        print(f"✅ Registration successful - Username: {username}")
+                        return redirect(url_for('login'))
                 except mysql.connector.Error as err:
                     if err.errno == 1062:  # Duplicate entry
                         error = "Username atau email sudah terdaftar!"
                     else:
                         error = f"Gagal menyimpan data: {err}"
                 finally:
-                    cursor.close()
                     conn.close()
             else:
                 error = "Tidak dapat terhubung ke database"
@@ -190,26 +219,50 @@ def register():
 
 @app.route("/checkout", methods=["POST"])
 def checkout():
-    if "user_id" not in session:
+    if "pelanggan_id" not in session:
         return jsonify({"error": "Not logged in"}), 401
 
     data = request.get_json()
+    print("📌 DATA MASUK CHECKOUT:", data)
+
+    # Ambil data dari front-end
     nama_tiket = data.get("nama_tiket")
     jumlah = data.get("jumlah")
     harga = data.get("harga")
-    user_id = session["user_id"]
+    tanggal_kunjungan = data.get("tanggal")  # masih dalam bentuk string
+    user_id = session["pelanggan_id"]
+
+    # Buat format datetime WIB (object, bukan string)
+    tz = pytz.timezone("Asia/Jakarta")
+    tanggal_pembelian = datetime.now(tz)
+
+    # Konversi tanggal kunjungan (string → date)
+    try:
+        tanggal_kunjungan = datetime.strptime(tanggal_kunjungan, "%Y-%m-%d").date()
+    except:
+        return jsonify({"error": "Format tanggal kunjungan tidak valid"}), 400
 
     conn = get_db()
+    if conn is None:
+        return jsonify({"error": "Database connection failed"}), 500
+
     cursor = conn.cursor()
 
     try:
         cursor.execute("""
-            INSERT INTO tiket (user_id, nama_tiket, jumlah, harga)
-            VALUES (%s, %s, %s, %s)
-        """, (user_id, nama_tiket, jumlah, harga))
+            INSERT INTO tiket (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (
+            user_id,
+            nama_tiket,
+            tanggal_kunjungan,
+            tanggal_pembelian,
+            jumlah,
+            harga
+        ))
 
         conn.commit()
-
+        print("✅ Tiket berhasil disimpan!")
         return jsonify({"status": "success", "message": "Tiket berhasil disimpan"})
 
     except Exception as e:
@@ -226,7 +279,7 @@ def tiket_saya():
     if not session.get("logged_in"):
         return redirect(url_for("login"))
 
-    user_id = session.get("user_id")
+    user_id = session.get("pelanggan_id")
 
     conn = get_db()
     tickets = []
@@ -235,7 +288,7 @@ def tiket_saya():
         cursor = conn.cursor(dictionary=True)
         try:
             cursor.execute("""
-                SELECT id_tiket, nama_tiket, tanggal_pembelian, jumlah, harga, total
+                SELECT id_tiket, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga, total
                 FROM tiket
                 WHERE user_id = %s
                 ORDER BY tanggal_pembelian DESC
@@ -261,6 +314,13 @@ def kontak():
 def logout():
     session.clear()
     return redirect(url_for('landing'))
+
+@app.route('/admin/index')
+def admin_index():
+    if not session.get("logged_in_admin"):
+        return redirect(url_for("login"))
+
+    return render_template("index.html", username=session.get("admin_username"))
 
 # ------------------------------
 # Jalankan aplikasi
