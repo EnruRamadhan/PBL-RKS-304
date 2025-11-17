@@ -135,7 +135,7 @@ def login():
                         session["logged_in_admin"] = True
 
                         print("✅ ADMIN LOGIN SUCCESS:", admin["username"])
-                        return redirect(url_for("admin_index"))  # buat halaman admin nanti
+                        return redirect(url_for("admin_dashboard"))  # buat halaman admin nanti
                     else:
                         error = "Password admin salah!"
                         return render_template("login.html", error=error)
@@ -276,7 +276,7 @@ def checkout():
 @app.route("/tiket")
 def tiket_saya():
     # Cek apakah user sudah login
-    if not session.get("logged_in"):
+    if not session.get("logged_in") and not session.get("logged_in_admin"):
         return redirect(url_for("login"))
 
     user_id = session.get("pelanggan_id")
@@ -315,12 +315,51 @@ def logout():
     session.clear()
     return redirect(url_for('landing'))
 
-@app.route('/admin/index')
-def admin_index():
-    if not session.get("logged_in_admin"):
-        return redirect(url_for("login"))
+def login_required_admin(f):
+    def wrapper(*args, **kwargs):
+        if not session.get("logged_in_admin"):
+            return redirect(url_for("admin_login"))
+        return f(*args, **kwargs)
+    wrapper.__name__ = f.__name__
+    return wrapper
 
-    return render_template("index.html", username=session.get("admin_username"))
+
+@app.route('/admin_login', methods=['GET'])
+def admin_login_page():
+    return render_template("admin_login.html")
+
+
+@app.route('/admin_login', methods=['POST'])
+def admin_login():
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    if username == "ginw" and password == "adminpassword":
+        session['logged_in_admin'] = True
+        session['admin_username'] = username
+        return redirect(url_for("admin_dashboard"))
+
+    return redirect(url_for("admin_login"))
+
+@app.route("/admin")
+def admin_dashboard():
+    if 'logged_in_admin' not in session:
+        return redirect('/login')
+    return render_template("admin.html")
+
+@app.route("/admin/tiket")
+@login_required_admin
+def admin_tiket():
+    # ambil semua tiket dari DB
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM tiket ORDER BY tanggal_pembelian DESC")
+    data = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template("admin_tiket.html", data=data, username=session.get("admin_username"))
 
 # ------------------------------
 # Jalankan aplikasi
