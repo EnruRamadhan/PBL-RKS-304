@@ -1,9 +1,12 @@
-from datetime import datetime
-import pytz
-import os
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import mysql.connector
 import bcrypt
+from functools import wraps
+from math import ceil
+import os
+from datetime import datetime
+import pytz
+from flask import flash
 
 # ----- Inisialisasi Flask -----
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -316,50 +319,247 @@ def logout():
     return redirect(url_for('landing'))
 
 def login_required_admin(f):
-    def wrapper(*args, **kwargs):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
         if not session.get("logged_in_admin"):
-            return redirect(url_for("admin_login"))
+            return redirect(url_for("admin_login_page"))
         return f(*args, **kwargs)
-    wrapper.__name__ = f.__name__
-    return wrapper
-
+    return decorated_function
 
 @app.route('/admin_login', methods=['GET'])
 def admin_login_page():
     return render_template("admin_login.html")
 
+@app.route("/admin_login", methods=["POST"])
+def admin_login_post():
+    username = request.form.get("username")
+    password = request.form.get("password")
 
-@app.route('/admin_login', methods=['POST'])
-def admin_login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-
-    if username == "ginw" and password == "adminpassword":
-        session['logged_in_admin'] = True
-        session['admin_username'] = username
-        return redirect(url_for("admin_dashboard"))
-
-    return redirect(url_for("admin_login"))
-
-@app.route("/admin")
-def admin_dashboard():
-    if 'logged_in_admin' not in session:
-        return redirect('/login')
-    return render_template("admin.html")
-
-@app.route("/admin/tiket")
-@login_required_admin
-def admin_tiket():
-    # ambil semua tiket dari DB
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM tiket ORDER BY tanggal_pembelian DESC")
-    data = cursor.fetchall()
-
+    cursor.execute("SELECT * FROM admin WHERE username=%s", (username,))
+    admin = cursor.fetchone()
     cursor.close()
     conn.close()
 
-    return render_template("admin_tiket.html", data=data, username=session.get("admin_username"))
+    if admin and bcrypt.checkpw(password.encode("utf-8"), admin['password'].encode("utf-8")):
+        session.clear()
+        session['logged_in_admin'] = True
+        session['admin_username'] = admin['username']
+        session['admin_id'] = admin['id_admin']
+        flash("Login admin berhasil!", "success")
+        return redirect(url_for("admin_dashboard"))
+
+    flash("Username atau password salah!", "danger")
+    return redirect(url_for("admin_login_page"))
+
+@app.route("/admin")
+@login_required_admin
+def admin_dashboard():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT COUNT(*) AS total FROM tiket")
+        total_tiket = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT COUNT(*) AS total FROM pelanggan")
+        total_users = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT SUM(total) AS total_pendapatan FROM tiket")
+        total_pendapatan = cursor.fetchone()["total_pendapatan"] or 0
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template(
+        "admin.html",
+        section="dashboard",
+        username=session.get("admin_username"),
+        total_tiket=total_tiket,
+        total_users=total_users,
+        total_pendapatan=total_pendapatan
+    )
+@app.route("/admin/tiket")
+@login_required_admin
+def admin_tiket_page():
+    page = int(request.args.get("page", 1))
+    per_page = 20
+    offset = (page-1)*per_page
+
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT COUNT(*) AS total FROM tiket")
+        total_items = cursor.fetchone()["total"]
+        total_pages = ceil(total_items / per_page)
+
+        cursor.execute(
+            "SELECT * FROM tiket ORDER BY tanggal_pembelian DESC LIMIT %s OFFSET %s",
+            (per_page, offset)
+        )
+        tiket = cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template(
+        "admin.html",
+        section="tiket",
+        username=session.get("admin_username"),
+        tiket=tiket,
+        page=page,
+        total_pages=total_pages
+    )
+
+@app.route("/admin/tiket/delete/<int:id_tiket>")
+@login_required_admin
+def admin_delete_tiket(id_tiket):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM tiket WHERE id_tiket=%s", (id_tiket,))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+    flash("Tiket berhasil dihapus.", "success")
+    return redirect(url_for("admin_tiket_page"))
+
+@app.route("/admin/tiket/edit/<int:id_tiket>", methods=["GET", "POST"])
+@login_required_admin
+def admin_edit_tiket(id_tiket):
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == "POST":
+        nama_tiket = request.form["nama_tiket"]
+        jumlah = int(request.form["jumlah"])
+        harga = float(request.form["harga"])
+        tanggal_kunjungan = request.form["tanggal_kunjungan"]
+        total = jumlah * harga
+        try:
+            cursor.execute("""
+                UPDATE tiket SET nama_tiket=%s, jumlah=%s, harga=%s, total=%s, tanggal_kunjungan=%s
+                WHERE id_tiket=%s
+            """, (nama_tiket, jumlah, harga, total, tanggal_kunjungan, id_tiket))
+            conn.commit()
+        finally:
+            cursor.close()
+            conn.close()
+        flash("Tiket berhasil diupdate.", "success")
+        return redirect(url_for("admin_tiket_page"))
+
+    try:
+        cursor.execute("SELECT * FROM tiket WHERE id_tiket=%s", (id_tiket,))
+        tiket = cursor.fetchone()
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template("edit_tiket.html", tiket=tiket)
+
+@app.route("/admin/user")
+@login_required_admin
+def admin_user():
+    page = int(request.args.get("page", 1))
+    per_page = 20
+    offset = (page-1)*per_page
+
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT COUNT(*) AS total FROM pelanggan")
+        total_items = cursor.fetchone()["total"]
+        total_pages = ceil(total_items / per_page)
+
+        cursor.execute(
+            "SELECT id_pelanggan, nama, username, email, tanggal_daftar FROM pelanggan "
+            "ORDER BY tanggal_daftar DESC LIMIT %s OFFSET %s",
+            (per_page, offset)
+        )
+        users = cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template(
+        "admin.html",
+        section="user",
+        username=session.get("admin_username"),
+        users=users,
+        page=page,
+        total_pages=total_pages
+    )
+
+@app.route("/admin/user/delete/<int:id_user>")
+@login_required_admin
+def admin_delete_user(id_user):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM pelanggan WHERE id_pelanggan=%s", (id_user,))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+    flash("User berhasil dihapus.", "success")
+    return redirect(url_for("admin_user"))
+
+@app.route("/admin/user/edit/<int:id_user>", methods=["GET","POST"])
+@login_required_admin
+def admin_edit_user(id_user):
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == "POST":
+        nama = request.form["nama"]
+        username = request.form["username"]
+        email = request.form["email"]
+        try:
+            cursor.execute("""
+                UPDATE pelanggan SET nama=%s, username=%s, email=%s WHERE id_pelanggan=%s
+            """, (nama, username, email, id_user))
+            conn.commit()
+        finally:
+            cursor.close()
+            conn.close()
+        flash("User berhasil diupdate.", "success")
+        return redirect(url_for("admin_user"))
+
+    try:
+        cursor.execute("SELECT * FROM pelanggan WHERE id_pelanggan=%s", (id_user,))
+        user = cursor.fetchone()
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template("edit_user.html", user=user)
+
+@app.route("/admin/settings", methods=["GET","POST"])
+@login_required_admin
+def admin_settings():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == "POST":
+        old_password = request.form["old_password"]
+        new_password = request.form["new_password"]
+        confirm_password = request.form["confirm_password"]
+
+        cursor.execute("SELECT password FROM admin WHERE id_admin=%s", (session['admin_id'],))
+        current_password_hash = cursor.fetchone()['password']
+
+        if not bcrypt.checkpw(old_password.encode('utf-8'), current_password_hash.encode('utf-8')):
+            flash("Password lama salah.", "danger")
+        elif new_password != confirm_password:
+            flash("Password baru tidak cocok.", "danger")
+        else:
+            hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            cursor.execute("UPDATE admin SET password=%s WHERE id_admin=%s", (hashed, session['admin_id']))
+            conn.commit()
+            flash("Password berhasil diupdate.", "success")
+    cursor.close()
+    conn.close()
+    return render_template("admin.html", section="settings", username=session.get("admin_username"))
 
 # ------------------------------
 # Jalankan aplikasi
