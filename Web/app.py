@@ -63,8 +63,8 @@ def init_database():
                     username VARCHAR(100) UNIQUE,
                     email VARCHAR(100) UNIQUE NOT NULL,
                     password VARCHAR(255) NOT NULL,
-                    no_hp VARCHAR(20),
-                    tanggal_daftar DATETIME DEFAULT CURRENT_TIMESTAMP
+                    tanggal_daftar DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    last_login DATETIME NULL
                 )
             """)
             conn.commit()
@@ -74,10 +74,6 @@ def init_database():
         finally:
             cursor.close()
             conn.close()
-
-# ------------------------------
-# ROUTES FRONTEND
-# ------------------------------
 
 # Landing page
 @app.route('/')
@@ -110,84 +106,70 @@ def index_page():  # GANTI NAMA FUNCTION INI
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
-
     if request.method == "POST":
-        username = request.form.get("username").strip()
-        password = request.form.get("password")
-
-        print(f"🔍 Login attempt: {username}")
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
 
         conn = get_db()
-        if conn:
-            cursor = conn.cursor(dictionary=True, buffered=True)
+        if conn is None:
+            error = "Tidak dapat terhubung ke database"
+            return render_template("login.html", error=error)
 
-            try:
-                # 🔎 1. Cek dulu apakah dia ADMIN
-                cursor.execute("SELECT * FROM admin WHERE username=%s", (username,))
-                admin = cursor.fetchone()
-
-                if admin:
-                    print("🔍 Admin found:", admin["username"])
-
-                    if bcrypt.checkpw(password.encode("utf-8"), admin["password"].encode("utf-8")):
-                        # 🎉 Login admin OK
-                        session.clear()
-                        session["admin_id"] = admin["id_admin"]
-                        session["admin_username"] = admin["username"]
-                        session["admin_role"] = admin["role"]
-                        session["logged_in_admin"] = True
-
-                        print("✅ ADMIN LOGIN SUCCESS:", admin["username"])
-                        return redirect(url_for("admin_dashboard"))  # buat halaman admin nanti
-                    else:
-                        error = "Password admin salah!"
-                        return render_template("login.html", error=error)
-
-                # 🔎 2. Jika bukan admin → cek sebagai pelanggan
-                cursor.execute(
-                    "SELECT id_pelanggan, username, password FROM pelanggan WHERE username=%s",
-                    (username,)
-                )
-                user = cursor.fetchone()
-
-                if user:
-                    print("🔍 Pelanggan found:", user["username"])
-
-                    if bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
-                        session.clear()
-                        session["pelanggan_id"] = user["id_pelanggan"]
-                        session["pelanggan_username"] = user["username"]
-                        session["logged_in"] = True
-
-                        print("✅ Pelanggan login success:", user["username"])
-                        return redirect(url_for("home"))
-
-                    else:
-                        error = "Password salah!"
+        cursor = conn.cursor(dictionary=True, buffered=True)
+        try:
+            # cek admin
+            cursor.execute("SELECT * FROM admin WHERE username=%s", (username,))
+            admin = cursor.fetchone()
+            if admin:
+                if bcrypt.checkpw(password.encode("utf-8"), admin["password"].encode("utf-8")):
+                    session.clear()
+                    session["admin_id"] = admin["id_admin"]
+                    session["admin_username"] = admin["username"]
+                    session["admin_role"] = admin.get("role")
+                    session["logged_in_admin"] = True
+                    flash("Admin login berhasil.", "success")
+                    return redirect(url_for("admin_dashboard"))
                 else:
+                    error = "Password admin salah!"
+                    return render_template("login.html", error=error)
+
+            # cek pelanggan
+            cursor.execute("SELECT id_pelanggan, username, password FROM pelanggan WHERE username=%s", (username,))
+            user = cursor.fetchone()
+            if user and bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
+                session.clear()
+                session["pelanggan_id"] = user["id_pelanggan"]
+                session["pelanggan_username"] = user["username"]
+                session["logged_in"] = True
+                flash("Login berhasil.", "success")
+                return redirect(url_for("home"))
+            else:
+                if not user:
                     error = "Username tidak ditemukan."
-
-            except mysql.connector.Error as err:
-                print("❌ Database error:", err)
-                error = f"Database error: {err}"
-
-            finally:
-                cursor.close()
-                conn.close()
+                else:
+                    error = "Password salah!"
+        except mysql.connector.Error as err:
+            print("❌ Database error:", err)
+            error = "Database error."
+        finally:
+            cursor.close()
+            conn.close()
 
     return render_template("login.html", error=error)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     error = None
+    
     if request.method == 'POST':
-        username = request.form.get('username').strip()
-        email = request.form.get('email').strip()
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
+        username = request.form.get('username', "").strip()
+        email = request.form.get('email', "").strip()
+        password = request.form.get('password', "")
+        confirm_password = request.form.get('confirm_password', "")
 
         print(f"🔍 Registration attempt - Username: {username}")
 
+        # Validasi
         if not all([username, email, password, confirm_password]):
             error = "Semua field wajib diisi!"
         elif password != confirm_password:
@@ -195,27 +177,39 @@ def register():
         elif len(password) < 6:
             error = "Password minimal 6 karakter!"
         else:
-            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            # Karena tidak ada nama, pakai username sebagai nama default
+            nama = username  
+
+            hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
             conn = get_db()
-            if conn:
-                try:
-                    with conn.cursor() as cursor:
-                        cursor.execute(
-                            "INSERT INTO pelanggan (nama, username, email, password) VALUES (%s, %s, %s, %s)",
-                            (username, username, email, hashed_password)
-                        )
-                        conn.commit()
-                        print(f"✅ Registration successful - Username: {username}")
-                        return redirect(url_for('login'))
-                except mysql.connector.Error as err:
-                    if err.errno == 1062:  # Duplicate entry
-                        error = "Username atau email sudah terdaftar!"
-                    else:
-                        error = f"Gagal menyimpan data: {err}"
-                finally:
-                    conn.close()
-            else:
+            if conn is None:
                 error = "Tidak dapat terhubung ke database"
+                return render_template('register.html', error=error)
+
+            cursor = conn.cursor()
+
+            try:
+                cursor.execute("""
+                    INSERT INTO pelanggan (nama, username, email, password)
+                    VALUES (%s, %s, %s, %s)
+                """, (nama, username, email, hashed))
+
+                conn.commit()
+                flash("Registrasi berhasil. Silakan login.", "success")
+                return redirect(url_for('login'))
+
+            except mysql.connector.Error as err:
+                print("❌ Error saat insert:", err)
+
+                if err.errno == 1062:
+                    error = "Username atau email sudah terdaftar!"
+                else:
+                    error = f"Gagal menyimpan data: {err}"
+
+            finally:
+                cursor.close()
+                conn.close()
 
     return render_template('register.html', error=error)
 
@@ -231,18 +225,23 @@ def checkout():
     nama_tiket = data.get("nama_tiket")
     jumlah = data.get("jumlah")
     harga = data.get("harga")
-    tanggal_kunjungan = data.get("tanggal")  # masih dalam bentuk string
+    tanggal_kunjungan = data.get("tanggal")  # string
     user_id = session["pelanggan_id"]
 
-    # Buat format datetime WIB (object, bukan string)
+    # Zona waktu WIB
     tz = pytz.timezone("Asia/Jakarta")
     tanggal_pembelian = datetime.now(tz)
 
-    # Konversi tanggal kunjungan (string → date)
+    # Konversi tanggal kunjungan dari string → date
     try:
         tanggal_kunjungan = datetime.strptime(tanggal_kunjungan, "%Y-%m-%d").date()
     except:
-        return jsonify({"error": "Format tanggal kunjungan tidak valid"}), 400
+        return jsonify({"error": "Format tanggal kunjungan tidak valid!"}), 400
+
+    # ❗ Validasi tanggal tidak boleh lewat
+    today = datetime.now(tz).date()
+    if tanggal_kunjungan < today:
+        return jsonify({"error": "Tanggal kunjungan sudah lewat!"}), 400
 
     conn = get_db()
     if conn is None:
@@ -265,7 +264,10 @@ def checkout():
 
         conn.commit()
         print("✅ Tiket berhasil disimpan!")
-        return jsonify({"status": "success", "message": "Tiket berhasil disimpan"})
+        return jsonify({
+            "status": "success",
+            "message": "Tiket berhasil disimpan"
+        }), 200
 
     except Exception as e:
         print("❌ ERROR simpan tiket:", e)
@@ -461,7 +463,7 @@ def admin_edit_tiket(id_tiket):
 @login_required_admin
 def admin_user():
     page = int(request.args.get("page", 1))
-    per_page = 20
+    per_page = 100
     offset = (page-1)*per_page
 
     conn = get_db()
@@ -473,9 +475,10 @@ def admin_user():
 
         cursor.execute(
             "SELECT id_pelanggan, nama, username, email, tanggal_daftar FROM pelanggan "
-            "ORDER BY tanggal_daftar DESC LIMIT %s OFFSET %s",
+            "ORDER BY id_pelanggan DESC LIMIT %s OFFSET %s",
             (per_page, offset)
         )
+
         users = cursor.fetchall()
     finally:
         cursor.close()
@@ -559,6 +562,68 @@ def admin_settings():
     cursor.close()
     conn.close()
     return render_template("admin.html", section="settings", username=session.get("admin_username"))
+
+@app.route("/admin/destinasi", methods=["GET", "POST"])
+@login_required_admin
+def admin_destinasi():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        if request.method == "POST":
+            nama = request.form.get("nama")
+            lokasi = request.form.get("lokasi")
+            deskripsi = request.form.get("deskripsi")
+            gambar = request.form.get("gambar")
+
+            if nama and lokasi:
+                cursor.execute(
+                    "INSERT INTO destinasi (nama, lokasi, deskripsi, gambar) VALUES (%s, %s, %s, %s)",
+                    (nama, lokasi, deskripsi, gambar)
+                )
+                conn.commit()
+                flash("Destinasi berhasil ditambahkan!", "success")
+            else:
+                flash("Nama dan lokasi wajib diisi.", "danger")
+
+        cursor.execute("SELECT * FROM destinasi ORDER BY id_destinasi DESC")
+        destinasi_list = cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template(
+        "admin.html",
+        section="destinasi",   # <= Penting! Ini bikin template tahu section Destinasi
+        destinasi_list=destinasi_list,
+        username=session.get("admin_username")
+    )
+
+@app.route("/admin/destinasi/delete/<int:id_destinasi>")
+@login_required_admin
+def admin_delete_destinasi(id_destinasi):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM destinasi WHERE id_destinasi=%s", (id_destinasi,))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+    flash("Destinasi berhasil dihapus.", "success")
+    return redirect(url_for("admin_destinasi"))
+
+@app.route("/")
+def index():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT * FROM destinasi ORDER BY id_destinasi DESC")
+        destinasi_list = cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template("index.html", destinasi_list=destinasi_list, username=session.get("pelanggan_username"))
 
 # ------------------------------
 # Jalankan aplikasi

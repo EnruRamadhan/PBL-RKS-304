@@ -31,7 +31,7 @@ function updateTotalHarga() {
 }
 
 // 🧾 Checkout
-function checkout() {
+async function checkout() {
   const namaPemesan = document.getElementById("namaPemesan").value.trim();
   const destinasi = document.getElementById("destinasiSelect").value;
   const tanggal = document.getElementById("tanggal").value;
@@ -45,42 +45,46 @@ function checkout() {
   const harga = hargaList[destinasi] || 0;
   const total = harga * jumlah;
 
-  localStorage.setItem("namaUser", namaPemesan);
+  try {
+    const res = await fetch("/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nama_tiket: destinasi,
+        jumlah: jumlah,
+        harga: harga,
+        tanggal: tanggal
+      })
+    });
 
-  document.getElementById("hasilBooking").innerText =
-    `Bukti Pemesanan Tiket Wisata\n\n` +
-    `Nama Pemesan: ${namaPemesan}\n` +
-    `Destinasi: ${destinasi}\n` +
-    `Tanggal: ${tanggal}\n` +
-    `Jumlah Tiket: ${jumlah}\n` +
-    `Harga per Tiket: Rp${harga.toLocaleString()}\n` +
-    `Total Bayar: Rp${total.toLocaleString()}`;
+    const data = await res.json();
 
-  document.getElementById("hasilBox").classList.remove("hidden");
-  sudahCheckout = true;
+    // ❌ Jika backend mengirim error → STOP
+    if (!res.ok) {
+      alert("❌ Checkout gagal: " + (data.error || data.message));
+      return;
+    }
 
-  // === Kirim ke backend Flask ===
-  fetch("/checkout", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      nama_tiket: destinasi,
-      jumlah: jumlah,
-      harga: harga,
-      tanggal: tanggal
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    console.log("Berhasil simpan ke database:", data);
-  })
-  .catch(err => {
+    localStorage.setItem("namaUser", namaPemesan);
+
+    document.getElementById("hasilBooking").innerText =
+      `Bukti Pemesanan Tiket Wisata\n\n` +
+      `Nama Pemesan: ${namaPemesan}\n` +
+      `Destinasi: ${destinasi}\n` +
+      `Tanggal: ${tanggal}\n` +
+      `Jumlah Tiket: ${jumlah}\n` +
+      `Harga per Tiket: Rp${harga.toLocaleString()}\n` +
+      `Total Bayar: Rp${total.toLocaleString()}`;
+
+    document.getElementById("hasilBox").classList.remove("hidden");
+    sudahCheckout = true;
+
+    alert("✅ Checkout berhasil! Silakan upload bukti pembayaran.");
+
+  } catch (err) {
     console.error("Error kirim ke server:", err);
-  });
-
-  alert("✅ Checkout berhasil! Silakan upload bukti pembayaran.");
+    alert("❌ Terjadi kesalahan saat menghubungi server.");
+  }
 }
 
 // 📤 Upload bukti pembayaran
