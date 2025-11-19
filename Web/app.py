@@ -177,7 +177,6 @@ def login():
 
     return render_template("login.html", error=error)
 
-# Register Pelanggan
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     error = None
