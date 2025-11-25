@@ -75,6 +75,14 @@ def init_database():
             cursor.close()
             conn.close()
 
+def login_required_pelanggan(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "pelanggan_username" not in session:
+            return redirect(url_for("login_pelanggan"))
+        return f(*args, **kwargs)
+    return decorated_function
+
 # Landing page
 @app.route('/')
 @app.route('/landing')
@@ -84,24 +92,38 @@ def landing():
     return render_template('landing.html')
 
 # Home page setelah login
-@app.route('/home')
+@app.route("/home")
+@login_required_pelanggan
 def home():
-    if 'pelanggan_id' not in session or not session.get('logged_in'):
-        print("❌ User not logged in, redirecting to login")
-        return redirect(url_for('login'))
-    
-    print(f"✅ User {session['pelanggan_username']} accessing home")
-    return render_template('index.html', username=session.get('pelanggan_username'))
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM destinasi ORDER BY id_destinasi DESC")
+    destinasi = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        "index.html",
+        username=session.get("pelanggan_username"),
+        destinasi=destinasi
+    )
 
 # Index page (alias untuk home) - GUNAKAN ENDPOINT NAME YANG BERBEDA
-@app.route('/index')
-def index_page():  # GANTI NAMA FUNCTION INI
-    if 'pelanggan_id' not in session or not session.get('logged_in'):
-        print("❌ User not logged in, redirecting to login")
-        return redirect(url_for('login'))
-    
-    print(f"✅ User {session['pelanggan_username']} accessing index")
-    return render_template('index.html', username=session.get('pelanggan_username'))
+@app.route("/index")
+@login_required_pelanggan
+def index_page():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM destinasi ORDER BY id_destinasi DESC")
+    destinasi = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        "index.html",
+        username=session.get("pelanggan_username"),
+        destinasi=destinasi
+    )
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -611,19 +633,6 @@ def admin_delete_destinasi(id_destinasi):
         conn.close()
     flash("Destinasi berhasil dihapus.", "success")
     return redirect(url_for("admin_destinasi"))
-
-@app.route("/")
-def index():
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute("SELECT * FROM destinasi ORDER BY id_destinasi DESC")
-        destinasi_list = cursor.fetchall()
-    finally:
-        cursor.close()
-        conn.close()
-
-    return render_template("index.html", destinasi_list=destinasi_list, username=session.get("pelanggan_username"))
 
 # ------------------------------
 # Jalankan aplikasi
