@@ -196,8 +196,8 @@ table.dataTable tbody tr:hover {
         <label class="font-semibold">Harga (Rp):</label>
         <input type="number" name="harga" class="form-control mb-3 border p-2 w-full" required placeholder="5000">
 
-        <label class="font-semibold">URL Gambar:</label>
-        <input type="text" name="gambar" class="form-control mb-3 border p-2 w-full" placeholder="URL gambar destinasi">
+        <label class="font-semibold">Link Gambar:</label>
+        <input type="text" name="gambar" class="form-control mb-3 border p-2 w-full" placeholder="Link gambar destinasi">
 
         <button type="submit" class="bg-orange-500 text-white w-full px-4 py-2 rounded">Tambah Destinasi</button>
     </form>
@@ -226,7 +226,13 @@ table.dataTable tbody tr:hover {
                 <td>{{ d.harga }}</td>
                 <td>
                     {% if d.gambar %}
-                        <img src="{{ d.gambar }}" alt="{{ d.nama }}" width="100">
+                        {% if d.gambar.startswith('http') %}
+                            <img src="{{ d.gambar }}" alt="{{ d.nama }}" class="rounded-xl h-48 object-cover mb-3">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/' ~ d.gambar) }}" alt="{{ d.nama }}" class="rounded-xl h-48 object-cover mb-3">
+                        {% endif %}
+                    {% else %}
+                        <span class="text-gray-400 italic">Tidak ada gambar</span>
                     {% endif %}
                 </td>
                 <td>

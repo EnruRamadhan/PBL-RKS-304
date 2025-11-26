@@ -94,7 +94,8 @@ def landing():
 # Home page setelah login
 @app.route("/home")
 def home():
-    destinasi_statis = [
+
+    destinasi_statis_raw = [
         {"nama":"Pantai Nongsa","deskripsi":"Pantai populer untuk bersantai dan menikmati matahari terbenam di Batam.","jam_buka":"24 Jam","harga":10000,"gambar":"nongsa.jpg"},
         {"nama":"Pantai Melayu","deskripsi":"Pantai luas dengan pasir putih halus dan ombak yang tenang, cocok untuk keluarga.","jam_buka":"07.00 - 18.00","harga":15000,"gambar":"melayu.jpg"},
         {"nama":"Pantai Vio-Vio","deskripsi":"Menawarkan spot foto instagramable dan tempat snorkeling yang indah.","jam_buka":"08.00 - 18.00","harga":10000,"gambar":"viovio.jpeg"},
@@ -107,12 +108,28 @@ def home():
         {"nama":"Ocarina Park","deskripsi":"Taman hiburan keluarga dengan wahana modern di tepi laut Batam.","jam_buka":"09.00 - 21.00","harga":25000,"gambar":"ocarina.jpeg"},
     ]
 
+    destinasi_statis = [
+        {
+            "id_destinasi": f"s{i}",
+            "nama": d["nama"],
+            "deskripsi": d["deskripsi"],
+            "jam_buka": d["jam_buka"],
+            "harga": d["harga"],
+            "gambar": d["gambar"]
+        }
+        for i, d in enumerate(destinasi_statis_raw, start=1)
+    ]
+
     destinasi_admin = []
     conn = get_db()
     if conn:
         cursor = conn.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT nama, deskripsi, jam_buka, harga, gambar FROM destinasi ORDER BY id_destinasi DESC")
+            cursor.execute("""
+                SELECT id_destinasi, nama, deskripsi, jam_buka, harga, gambar
+                FROM destinasi
+                ORDER BY id_destinasi DESC
+            """)
             destinasi_admin = cursor.fetchall()
         except Exception as e:
             print("❌ Error fetch destinasi admin:", e)
@@ -125,7 +142,8 @@ def home():
     return render_template(
         "index.html",
         username=session.get("pelanggan_username", "Guest"),
-        destinasi=destinasi
+        destinasi=destinasi,
+        destinasi_list=destinasi   
     )
 
 @app.route("/index")
@@ -254,6 +272,19 @@ def register():
 
     return render_template('register.html', error=error)
 
+@app.route("/pelanggan")
+def pelanggan_home():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM destinasi ORDER BY nama ASC")
+    destinasi_list = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template("pelanggan.html", destinasi_list=destinasi_list)
+
 @app.route("/checkout", methods=["POST"])
 def checkout():
     if "pelanggan_id" not in session:
@@ -262,52 +293,53 @@ def checkout():
     data = request.get_json()
     print("📌 DATA MASUK CHECKOUT:", data)
 
-    # Ambil data dari front-end
-    nama_tiket = data.get("nama_tiket")
-    jumlah = data.get("jumlah")
-    harga = data.get("harga")
-    tanggal_kunjungan = data.get("tanggal")  # string
+    nama_tiket = data.get("nama_tiket")  
+    jumlah = int(data.get("jumlah"))
+    tanggal_kunjungan = data.get("tanggal")
     user_id = session["pelanggan_id"]
 
-    # Zona waktu WIB
     tz = pytz.timezone("Asia/Jakarta")
     tanggal_pembelian = datetime.now(tz)
 
-    # Konversi tanggal kunjungan dari string → date
+    # Validasi format tanggal
     try:
         tanggal_kunjungan = datetime.strptime(tanggal_kunjungan, "%Y-%m-%d").date()
     except:
         return jsonify({"error": "Format tanggal kunjungan tidak valid!"}), 400
 
-    # ❗ Validasi tanggal tidak boleh lewat
-    today = datetime.now(tz).date()
-    if tanggal_kunjungan < today:
+    if tanggal_kunjungan < datetime.now(tz).date():
         return jsonify({"error": "Tanggal kunjungan sudah lewat!"}), 400
 
     conn = get_db()
-    if conn is None:
-        return jsonify({"error": "Database connection failed"}), 500
-
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
     try:
+        # 🔥 CARI DESTINASI BERDASARKAN NAMA (BUKAN ID)
+        cursor.execute("SELECT nama, harga FROM destinasi WHERE nama = %s", (nama_tiket,))
+        destinasi = cursor.fetchone()
+
+        print("🎯 HASIL QUERY DESTINASI:", destinasi)
+
+        if not destinasi:
+            return jsonify({"error": "Destinasi tidak ditemukan"}), 400
+
+        harga = destinasi["harga"]
+        total = harga * jumlah
+
+        # 🔥 SIMPAN PEMESANAN
         cursor.execute("""
             INSERT INTO tiket (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga)
             VALUES (%s, %s, %s, %s, %s, %s)
-        """, (
-            user_id,
-            nama_tiket,
-            tanggal_kunjungan,
-            tanggal_pembelian,
-            jumlah,
-            harga
-        ))
+        """, (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga))
 
         conn.commit()
-        print("✅ Tiket berhasil disimpan!")
+
         return jsonify({
             "status": "success",
-            "message": "Tiket berhasil disimpan"
+            "nama_tiket": nama_tiket,
+            "jumlah": jumlah,
+            "harga": harga,
+            "total": total
         }), 200
 
     except Exception as e:
@@ -320,7 +352,6 @@ def checkout():
 
 @app.route("/tiket")
 def tiket_saya():
-    # Cek apakah user sudah login
     if not session.get("logged_in") and not session.get("logged_in_admin"):
         return redirect(url_for("login"))
 

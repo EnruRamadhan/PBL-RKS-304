@@ -30,19 +30,22 @@ function updateTotalHarga() {
   }
 }
 
-// 🧾 Checkout
 async function checkout() {
   const namaPemesan = document.getElementById("namaPemesan").value.trim();
-  const destinasi = document.getElementById("destinasiSelect").value;
+  const selectEl = document.getElementById("destinasiSelect");
+
+  const destinasi_id = selectEl.value; 
+  const destinasi_nama = selectEl.options[selectEl.selectedIndex].text;
+  const harga = parseInt(selectEl.options[selectEl.selectedIndex].dataset.harga);
+
   const tanggal = document.getElementById("tanggal").value;
   const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
 
-  if (!namaPemesan || !destinasi || !tanggal || jumlah < 1) {
+  if (!namaPemesan || !destinasi_id || !tanggal || jumlah < 1) {
     alert("⚠️ Lengkapi semua data pemesanan!");
     return;
   }
 
-  const harga = hargaList[destinasi] || 0;
   const total = harga * jumlah;
 
   try {
@@ -50,7 +53,8 @@ async function checkout() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        nama_tiket: destinasi,
+        destinasi_id: destinasi_id,
+        nama_tiket: destinasi_nama,
         jumlah: jumlah,
         harga: harga,
         tanggal: tanggal
@@ -59,18 +63,15 @@ async function checkout() {
 
     const data = await res.json();
 
-    // ❌ Jika backend mengirim error → STOP
     if (!res.ok) {
       alert("❌ Checkout gagal: " + (data.error || data.message));
       return;
     }
 
-    localStorage.setItem("namaUser", namaPemesan);
-
     document.getElementById("hasilBooking").innerText =
       `Bukti Pemesanan Tiket Wisata\n\n` +
       `Nama Pemesan: ${namaPemesan}\n` +
-      `Destinasi: ${destinasi}\n` +
+      `Destinasi: ${destinasi_nama}\n` +
       `Tanggal: ${tanggal}\n` +
       `Jumlah Tiket: ${jumlah}\n` +
       `Harga per Tiket: Rp${harga.toLocaleString()}\n` +
@@ -79,11 +80,11 @@ async function checkout() {
     document.getElementById("hasilBox").classList.remove("hidden");
     sudahCheckout = true;
 
-    alert("✅ Checkout berhasil! Silakan upload bukti pembayaran.");
+    alert("✅ Checkout berhasil!");
 
   } catch (err) {
-    console.error("Error kirim ke server:", err);
-    alert("❌ Terjadi kesalahan saat menghubungi server.");
+    console.error("Error:", err);
+    alert("❌ Error server.");
   }
 }
 
@@ -224,6 +225,20 @@ document.getElementById("searchInput").addEventListener("input", function () {
   });
 });
 
-// ⏱️ Update harga otomatis saat input berubah
-document.getElementById("destinasiSelect").addEventListener("change", updateTotalHarga);
-document.getElementById("jumlah").addEventListener("input", updateTotalHarga);
+document.getElementById('jumlah').addEventListener('input', hitungTotal);
+document.getElementById('destinasiSelect').addEventListener('change', hitungTotal);
+
+function hitungTotal() {
+    let select = document.getElementById('destinasiSelect');
+    let jumlah = document.getElementById('jumlah').value;
+
+    let harga = select.options[select.selectedIndex].getAttribute('data-harga');
+
+    if (harga && jumlah) {
+        let total = parseInt(harga) * parseInt(jumlah);
+        document.getElementById('previewHarga').innerText =
+            "Total: Rp" + total.toLocaleString("id-ID");
+    } else {
+        document.getElementById('previewHarga').innerText = "";
+    }
+}

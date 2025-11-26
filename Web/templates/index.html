@@ -69,18 +69,12 @@
 
 
             <label class="block mb-2 text-gray-600">Pilih Destinasi</label>
-            <select id="destinasiSelect" class="w-full mb-4 p-2 rounded-lg border focus:ring-2 focus:ring-orange-200">
+            <select id="destinasiSelect"
+                     class="w-full mb-4 p-2 rounded-lg border focus:ring-2 focus:ring-orange-200">
                 <option value="">-- Pilih Destinasi --</option>
-                <option>Pantai Nongsa</option>
-                <option>Pantai Melayu</option>
-                <option>Pantai Vio-Vio</option>
-                <option>Pantai Elyora</option>
-                <option>Pantai Marina</option>
-                <option>Pantai Melur</option>
-                <option>Taman Rusa</option>
-                <option>Kampung Vietnam</option>
-                <option>Mata Kucing</option>
-                <option>Ocarina Park</option>
+                    {% for d in destinasi %}
+                        <option value="{{ d.nama }}" data-harga="{{ d.harga }}">{{ d.nama }}</option>
+                    {% endfor %}
             </select>
 
             <label class="block mb-2 text-gray-600">Tanggal Kunjungan</label>
@@ -130,7 +124,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {% for d in destinasi %}
                 <div class="destinasi-card bg-white/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition p-4 flex flex-col">
-                    <img src="{{ url_for('static', filename='images/' ~ d.gambar) }}" alt="{{ d.nama }}" class="rounded-xl h-48 object-cover mb-3">
+                    {% if '://' in d.gambar %}
+                        <img src="{{ d.gambar }}" alt="{{ d.nama }}" class="rounded-xl h-48 object-cover mb-3">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/' ~ d.gambar) }}" alt="{{ d.nama }}" class="rounded-xl h-48 object-cover mb-3">
+                    {% endif %}
                     <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ d.nama }}</h3>
                     <p class="text-sm text-gray-500 flex-1">{{ d.deskripsi }}</p>
                     <p class="mt-3 font-bold text-orange-500">Jam Buka: {{ d.jam_buka }}</p>
