@@ -93,28 +93,47 @@ def landing():
 
 # Home page setelah login
 @app.route("/home")
-@login_required_pelanggan
 def home():
+    destinasi_statis = [
+        {"nama":"Pantai Nongsa","deskripsi":"Pantai populer untuk bersantai dan menikmati matahari terbenam di Batam.","jam_buka":"24 Jam","harga":10000,"gambar":"nongsa.jpg"},
+        {"nama":"Pantai Melayu","deskripsi":"Pantai luas dengan pasir putih halus dan ombak yang tenang, cocok untuk keluarga.","jam_buka":"07.00 - 18.00","harga":15000,"gambar":"melayu.jpg"},
+        {"nama":"Pantai Vio-Vio","deskripsi":"Menawarkan spot foto instagramable dan tempat snorkeling yang indah.","jam_buka":"08.00 - 18.00","harga":10000,"gambar":"viovio.jpeg"},
+        {"nama":"Pantai Elyora","deskripsi":"Pantai dengan pemandangan indah dan area perkemahan yang nyaman.","jam_buka":"08.00 - 18.00","harga":10000,"gambar":"elyora.jpg"},
+        {"nama":"Pantai Marina","deskripsi":"Tempat wisata dengan taman dan spot foto modern di pinggir pantai.","jam_buka":"07.00 - 19.00","harga":20000,"gambar":"marina.jpeg"},
+        {"nama":"Pantai Melur","deskripsi":"Pantai dengan pasir putih dan suasana alami, cocok untuk liburan santai.","jam_buka":"24 Jam","harga":5000,"gambar":"melur.jpeg"},
+        {"nama":"Taman Rusa","deskripsi":"Tempat wisata edukatif dengan rusa dan area jogging yang sejuk.","jam_buka":"07.00 - 18.00","harga":5000,"gambar":"tamanrusa.jpeg"},
+        {"nama":"Kampung Vietnam","deskripsi":"Situs sejarah peninggalan pengungsi Vietnam dengan suasana klasik.","jam_buka":"08.00 - 17.00","harga":20000,"gambar":"kmpgvietnam.jpeg"},
+        {"nama":"Mata Kucing","deskripsi":"Kawasan wisata alam dengan kolam renang, hutan, dan taman bermain.","jam_buka":"08.00 - 17.00","harga":10000,"gambar":"matakucing.jpeg"},
+        {"nama":"Ocarina Park","deskripsi":"Taman hiburan keluarga dengan wahana modern di tepi laut Batam.","jam_buka":"09.00 - 21.00","harga":25000,"gambar":"ocarina.jpeg"},
+    ]
+
+    destinasi_admin = []
     conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM destinasi ORDER BY id_destinasi DESC")
-    destinasi = cursor.fetchall()
-    cursor.close()
-    conn.close()
+    if conn:
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT nama, deskripsi, jam_buka, harga, gambar FROM destinasi ORDER BY id_destinasi DESC")
+            destinasi_admin = cursor.fetchall()
+        except Exception as e:
+            print("❌ Error fetch destinasi admin:", e)
+        finally:
+            cursor.close()
+            conn.close()
+
+    destinasi = destinasi_statis + destinasi_admin
 
     return render_template(
         "index.html",
-        username=session.get("pelanggan_username"),
+        username=session.get("pelanggan_username", "Guest"),
         destinasi=destinasi
     )
 
-# Index page (alias untuk home) - GUNAKAN ENDPOINT NAME YANG BERBEDA
 @app.route("/index")
 @login_required_pelanggan
 def index_page():
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM destinasi ORDER BY id_destinasi DESC")
+    cursor.execute("SELECT * FROM destinasi ORDER BY is_statis DESC, id_destinasi ASC")
     destinasi = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -590,32 +609,35 @@ def admin_settings():
 def admin_destinasi():
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
+    
     try:
         if request.method == "POST":
             nama = request.form.get("nama")
             lokasi = request.form.get("lokasi")
             deskripsi = request.form.get("deskripsi")
+            jam_buka = request.form.get("jam_buka")
+            harga = request.form.get("harga")
             gambar = request.form.get("gambar")
 
-            if nama and lokasi:
-                cursor.execute(
-                    "INSERT INTO destinasi (nama, lokasi, deskripsi, gambar) VALUES (%s, %s, %s, %s)",
-                    (nama, lokasi, deskripsi, gambar)
-                )
-                conn.commit()
-                flash("Destinasi berhasil ditambahkan!", "success")
-            else:
-                flash("Nama dan lokasi wajib diisi.", "danger")
+            cursor.execute("""
+                INSERT INTO destinasi (nama, lokasi, deskripsi, jam_buka, harga, gambar)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (nama, lokasi, deskripsi, jam_buka, harga, gambar))
+
+            conn.commit()
+            flash("Destinasi berhasil ditambahkan!", "success")
+            return redirect(url_for("admin_destinasi"))
 
         cursor.execute("SELECT * FROM destinasi ORDER BY id_destinasi DESC")
         destinasi_list = cursor.fetchall()
+
     finally:
         cursor.close()
         conn.close()
 
     return render_template(
         "admin.html",
-        section="destinasi",   # <= Penting! Ini bikin template tahu section Destinasi
+        section="destinasi",
         destinasi_list=destinasi_list,
         username=session.get("admin_username")
     )

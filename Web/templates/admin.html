@@ -108,7 +108,7 @@ table.dataTable tbody tr:hover {
         {% endif %}
     {% endwith %}
 
-    <!-- Dashboard -->
+    <!-- SECTION: DASHBOARD -->
     {% if section=='dashboard' %}
         <div class="welcome-box">
             <h1>Selamat datang, {{ username }} 👋</h1>
@@ -116,8 +116,8 @@ table.dataTable tbody tr:hover {
             <p>📌 Total Pelanggan: {{ total_users }}</p>
             <p>💰 Total Pendapatan: Rp {{ total_pendapatan }}</p>
         </div>
-
-    <!-- Kelola Tiket -->
+    
+    <!-- SECTION: KELOLA TIKET -->
     {% elif section=='tiket' %}
         <h2 class="section-title">Kelola Tiket</h2>
         <table id="tiketTable" class="display nowrap">
@@ -146,7 +146,7 @@ table.dataTable tbody tr:hover {
             </tbody>
         </table>
 
-    <!-- Kelola User -->
+    <!-- SECTION: KELOLA USER -->
     {% elif section=='user' %}
         <h2 class="section-title">Kelola Pelanggan</h2>
         <table id="userTable" class="display nowrap">
@@ -175,52 +175,73 @@ table.dataTable tbody tr:hover {
             </tbody>
         </table>
 
-        <a href="{{ url_for('admin_destinasi') }}">🗺️ Kelola Destinasi</a>
-        <!-- Kelola Destinasi -->
+    <!-- SECTION: KELOLA DESTINASI -->
     {% elif section=='destinasi' %}
-        <h2 class="section-title">Kelola Destinasi</h2>
+    <h2 class="section-title">Kelola Destinasi</h2>
 
-        <form method="POST" class="mb-6 space-y-3 bg-white p-4 rounded shadow">
-            <input type="text" name="nama" placeholder="Nama Destinasi" class="border p-2 w-full" required>
-            <input type="text" name="lokasi" placeholder="Lokasi" class="border p-2 w-full" required>
-            <textarea name="deskripsi" placeholder="Deskripsi" class="border p-2 w-full"></textarea>
-            <input type="text" name="gambar" placeholder="URL Gambar" class="border p-2 w-full">
-            <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded">Tambah Destinasi</button>
-        </form>
+    <form action="{{ url_for('admin_destinasi') }}" method="POST" enctype="multipart/form-data" class="p-4 rounded shadow bg-white mb-6">
 
-        <!-- List destinasi -->
-        <table id="destinasiTable" class="display nowrap">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nama</th>
-                    <th>Lokasi</th>
-                    <th>Deskripsi</th>
-                    <th>Gambar</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for d in destinasi_list %}
-                <tr>
-                    <td>{{ d.id_destinasi }}</td>
-                    <td>{{ d.nama }}</td>
-                    <td>{{ d.lokasi }}</td>
-                    <td>{{ d.deskripsi }}</td>
-                    <td>
-                        {% if d.gambar %}
-                            <img src="{{ d.gambar }}" alt="{{ d.nama }}" width="100">
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{{ url_for('admin_delete_destinasi', id_destinasi=d.id_destinasi) }}" style="color:red;" onclick="return confirm('Hapus destinasi ini?');">Hapus</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <label class="font-semibold">Nama Destinasi:</label>
+        <input type="text" name="nama" class="form-control mb-3 border p-2 w-full" required placeholder="Contoh: Taman Rusa">
 
-    <!-- Settings -->
+        <label class="font-semibold">Lokasi:</label>
+        <input type="text" name="lokasi" class="form-control mb-3 border p-2 w-full" required placeholder="Contoh: Batam Center">
+
+        <label class="font-semibold">Deskripsi:</label>
+        <textarea name="deskripsi" class="form-control mb-3 border p-2 w-full" rows="3" placeholder="Deskripsi singkat destinasi"></textarea>
+
+        <label class="font-semibold">Jam Buka:</label>
+        <input type="text" name="jam_buka" class="form-control mb-3 border p-2 w-full" required placeholder="07.00 - 18.00">
+
+        <label class="font-semibold">Harga (Rp):</label>
+        <input type="number" name="harga" class="form-control mb-3 border p-2 w-full" required placeholder="5000">
+
+        <label class="font-semibold">URL Gambar:</label>
+        <input type="text" name="gambar" class="form-control mb-3 border p-2 w-full" placeholder="URL gambar destinasi">
+
+        <button type="submit" class="bg-orange-500 text-white w-full px-4 py-2 rounded">Tambah Destinasi</button>
+    </form>
+
+    <table id="destinasiTable" class="display nowrap" style="width:100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nama</th>
+                <th>Lokasi</th>
+                <th>Deskripsi</th>
+                <th>Jam Buka</th>
+                <th>Harga (Rp)</th>
+                <th>Gambar</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in destinasi_list %}
+            <tr>
+                <td>{{ d.id_destinasi }}</td>
+                <td>{{ d.nama }}</td>
+                <td>{{ d.lokasi }}</td>
+                <td>{{ d.deskripsi }}</td>
+                <td>{{ d.jam_buka }}</td>
+                <td>{{ d.harga }}</td>
+                <td>
+                    {% if d.gambar %}
+                        <img src="{{ d.gambar }}" alt="{{ d.nama }}" width="100">
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('admin_delete_destinasi', id_destinasi=d.id_destinasi) }}" 
+                        style="color:red;" 
+                        onclick="return confirm('Hapus destinasi ini?');">
+                        Hapus
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- SECTION: SETTINGS -->
     {% elif section=='settings' %}
         <h2 class="section-title">Pengaturan Admin</h2>
         <form method="POST">
@@ -230,16 +251,18 @@ table.dataTable tbody tr:hover {
             <button type="submit">Update Password</button>
         </form>
     {% endif %}
+
 </div>
 
 <script>
 $(document).ready(function () {
-    $('#userTable, #tiketTable, #destinasiTable').DataTable({
-        responsive: true,
+    $('#destinasiTable').DataTable({
+        responsive: false,
+        scrollX: true,
         dom: 'Bfrtip',
         buttons: ['excelHtml5','pdfHtml5'],
         pageLength: 15,
-        order: [[0, 'desc']],
+        order: [[0,'desc']],  // urut ID terbaru di atas
         language: {
             search: "🔍 Cari:",
             lengthMenu: "Tampilkan _MENU_ data",
