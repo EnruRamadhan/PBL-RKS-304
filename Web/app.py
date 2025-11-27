@@ -293,7 +293,7 @@ def checkout():
     data = request.get_json()
     print("📌 DATA MASUK CHECKOUT:", data)
 
-    nama_tiket = data.get("nama_tiket")  
+    nama_tiket = data.get("nama_tiket")
     jumlah = int(data.get("jumlah"))
     tanggal_kunjungan = data.get("tanggal")
     user_id = session["pelanggan_id"]
@@ -301,7 +301,6 @@ def checkout():
     tz = pytz.timezone("Asia/Jakarta")
     tanggal_pembelian = datetime.now(tz)
 
-    # Validasi format tanggal
     try:
         tanggal_kunjungan = datetime.strptime(tanggal_kunjungan, "%Y-%m-%d").date()
     except:
@@ -314,23 +313,40 @@ def checkout():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # 🔥 CARI DESTINASI BERDASARKAN NAMA (BUKAN ID)
         cursor.execute("SELECT nama, harga FROM destinasi WHERE nama = %s", (nama_tiket,))
-        destinasi = cursor.fetchone()
+        destinasi_db = cursor.fetchone()
 
-        print("🎯 HASIL QUERY DESTINASI:", destinasi)
+        if destinasi_db:
+            harga = destinasi_db["harga"]
+        else:
+            destinasi_statis = [
+                "Pantai Nongsa","Pantai Melayu","Pantai Vio-Vio","Pantai Elyora",
+                "Pantai Marina","Pantai Melur","Taman Rusa","Kampung Vietnam",
+                "Mata Kucing","Ocarina Park"
+            ]
+            if nama_tiket not in destinasi_statis:
+                return jsonify({"error": "Destinasi tidak ditemukan"}), 400
 
-        if not destinasi:
-            return jsonify({"error": "Destinasi tidak ditemukan"}), 400
+            harga_list = {
+                "Pantai Nongsa": 10000,
+                "Pantai Melayu": 15000,
+                "Pantai Vio-Vio": 10000,
+                "Pantai Elyora": 10000,
+                "Pantai Marina": 20000,
+                "Pantai Melur": 5000,
+                "Taman Rusa": 5000,
+                "Kampung Vietnam": 20000,
+                "Mata Kucing": 10000,
+                "Ocarina Park": 25000
+            }
+            harga = harga_list.get(nama_tiket, 0)
 
-        harga = destinasi["harga"]
         total = harga * jumlah
 
-        # 🔥 SIMPAN PEMESANAN
         cursor.execute("""
-            INSERT INTO tiket (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga))
+            INSERT INTO tiket (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga, "Belum Bayar"))
 
         conn.commit()
 
@@ -530,6 +546,17 @@ def admin_edit_tiket(id_tiket):
         conn.close()
 
     return render_template("edit_tiket.html", tiket=tiket)
+
+@app.route("/admin/konfirmasi/<int:tiket_id>")
+def konfirmasi_tiket(tiket_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE tiket SET status = 'Sudah Bayar' WHERE id_tiket = %s", (tiket_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    flash("✅ Tiket berhasil dikonfirmasi sebagai Sudah Bayar!", "success")
+    return redirect(url_for('admin_tiket_page'))
 
 @app.route("/admin/user")
 @login_required_admin

@@ -27,10 +27,6 @@
                     Beranda
                     <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-rose-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
                 </a>
-                <a href="#destinasi" class="relative group">
-                    Destinasi
-                    <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-orange-300 to-amber-300 group-hover:w-full transition-all duration-300"></span>
-                </a>
                 <a href="{{ url_for('tiket_saya') }}" class="relative group">
                     Tiket Saya
                     <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-pink-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
@@ -72,9 +68,11 @@
             <select id="destinasiSelect"
                      class="w-full mb-4 p-2 rounded-lg border focus:ring-2 focus:ring-orange-200">
                 <option value="">-- Pilih Destinasi --</option>
-                    {% for d in destinasi %}
-                        <option value="{{ d.nama }}" data-harga="{{ d.harga }}">{{ d.nama }}</option>
-                    {% endfor %}
+                {% for d in destinasi %}
+                    <option value="{{ d.nama }}" data-harga="{{ d.harga }}">
+                        {{ d.nama }}
+                    </option>
+                {% endfor %}
             </select>
 
             <label class="block mb-2 text-gray-600">Tanggal Kunjungan</label>

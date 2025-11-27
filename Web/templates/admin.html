@@ -125,7 +125,7 @@ table.dataTable tbody tr:hover {
                 <tr>
                     <th>ID</th><th>User ID</th><th>Nama Tiket</th>
                     <th>Tanggal Kunjungan</th><th>Jumlah</th>
-                    <th>Harga</th><th>Total</th><th>Aksi</th>
+                    <th>Harga</th><th>Total</th><th>Status</th><th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -138,6 +138,13 @@ table.dataTable tbody tr:hover {
                     <td>{{ t.jumlah }}</td>
                     <td>{{ t.harga }}</td>
                     <td>{{ t.total }}</td>
+                    <td>{{ t.status }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_delete_tiket', id_tiket=t.id_tiket) }}" style="color:red;">Hapus</a>
+                        {% if t.status == 'Belum Bayar' %}
+                            | <a href="{{ url_for('konfirmasi_tiket', tiket_id=t.id_tiket) }}" style="color:green;">Konfirmasi Bayar</a>
+                        {% endif %}
+                    </td>
                     <td>
                         <a href="{{ url_for('admin_delete_tiket', id_tiket=t.id_tiket) }}" style="color:red;">Hapus</a>
                     </td>

@@ -1,27 +1,13 @@
 let sudahCheckout = false;
 let sudahUpload = false;
 
-// 💰 Daftar harga destinasi
-const hargaList = {
-  "Pantai Nongsa": 10000,
-  "Pantai Melayu": 15000,
-  "Pantai Vio-Vio": 10000,
-  "Pantai Elyora": 10000,
-  "Pantai Marina": 20000,
-  "Pantai Melur": 5000,
-  "Taman Rusa": 5000,
-  "Kampung Vietnam": 20000,
-  "Mata Kucing": 10000,
-  "Ocarina Park": 25000,
-};
-
 // 🧮 Update total harga otomatis
 function updateTotalHarga() {
   const destinasi = document.getElementById("destinasiSelect").value;
   const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
-  const harga = hargaList[destinasi] || 0;
+  const select = document.getElementById("destinasiSelect");
+  const harga = parseInt(select.options[select.selectedIndex].dataset.harga)
   const total = harga * jumlah;
-
   const previewHarga = document.getElementById("previewHarga");
   if (destinasi && jumlah > 0) {
     previewHarga.innerText = `Total Harga: Rp${total.toLocaleString("id-ID")}`;
@@ -31,30 +17,24 @@ function updateTotalHarga() {
 }
 
 async function checkout() {
-  const namaPemesan = document.getElementById("namaPemesan").value.trim();
-  const selectEl = document.getElementById("destinasiSelect");
-
-  const destinasi_id = selectEl.value; 
-  const destinasi_nama = selectEl.options[selectEl.selectedIndex].text;
-  const harga = parseInt(selectEl.options[selectEl.selectedIndex].dataset.harga);
-
+  const destinasiSelect = document.getElementById("destinasiSelect");
+  const destinasi = destinasiSelect.value;
+  const harga = parseInt(destinasiSelect.options[destinasiSelect.selectedIndex].dataset.harga) || 0;
   const tanggal = document.getElementById("tanggal").value;
   const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
+  const namaPemesan = document.getElementById("namaPemesan").value.trim();
 
-  if (!namaPemesan || !destinasi_id || !tanggal || jumlah < 1) {
+  if (!namaPemesan || !destinasi || !tanggal || jumlah < 1) {
     alert("⚠️ Lengkapi semua data pemesanan!");
     return;
   }
-
-  const total = harga * jumlah;
 
   try {
     const res = await fetch("/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        destinasi_id: destinasi_id,
-        nama_tiket: destinasi_nama,
+        nama_tiket: destinasi,
         jumlah: jumlah,
         harga: harga,
         tanggal: tanggal
@@ -68,22 +48,9 @@ async function checkout() {
       return;
     }
 
-    document.getElementById("hasilBooking").innerText =
-      `Bukti Pemesanan Tiket Wisata\n\n` +
-      `Nama Pemesan: ${namaPemesan}\n` +
-      `Destinasi: ${destinasi_nama}\n` +
-      `Tanggal: ${tanggal}\n` +
-      `Jumlah Tiket: ${jumlah}\n` +
-      `Harga per Tiket: Rp${harga.toLocaleString()}\n` +
-      `Total Bayar: Rp${total.toLocaleString()}`;
-
-    document.getElementById("hasilBox").classList.remove("hidden");
-    sudahCheckout = true;
-
     alert("✅ Checkout berhasil!");
-
+    sudahCheckout = true;
   } catch (err) {
-    console.error("Error:", err);
     alert("❌ Error server.");
   }
 }
@@ -110,7 +77,7 @@ function downloadBukti() {
   }
 
   // 🧾 Ambil data user & form
-  const namaUser = localStorage.getItem("namaUser")?.trim() || "Nama Pemesan";
+  const namaUser = document.getElementById("namaPemesan").value.trim() || "Nama Pemesan";
   const destinasi = document.getElementById("destinasiSelect")?.value || "-";
   const tanggalRaw = document.getElementById("tanggal")?.value || "-";
   const tanggal = tanggalRaw !== "-" 
@@ -122,7 +89,9 @@ function downloadBukti() {
       }) 
     : "-";
   const jumlahTiket = parseInt(document.getElementById("jumlah")?.value) || 0;
-  const hargaTiket = hargaList[destinasi] || 0;
+  const hargaTiket = parseInt(
+    document.querySelector(`#destinasiSelect option[value="${destinasi}"]`)?.dataset.harga
+  ) || 0;
   const totalBayar = hargaTiket * jumlahTiket;
 
   // 🧩 Pastikan jsPDF tersedia
