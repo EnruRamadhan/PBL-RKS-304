@@ -1,5 +1,6 @@
 let sudahCheckout = false;
 let sudahUpload = false;
+let currentTiketID = null;
 
 // 🧮 Update total harga otomatis
 function updateTotalHarga() {
@@ -42,6 +43,7 @@ async function checkout() {
     });
 
     const data = await res.json();
+    window.currentTiketID = data.tiket_id;
 
     if (!res.ok) {
       alert("❌ Checkout gagal: " + (data.error || data.message));
@@ -50,19 +52,36 @@ async function checkout() {
 
     alert("✅ Checkout berhasil!");
     sudahCheckout = true;
+    currentTiketID = data.tiket_id;
+    console.log("Tiket ID:", currentTiketID);
   } catch (err) {
     alert("❌ Error server.");
   }
 }
 
-// 📤 Upload bukti pembayaran
-document.getElementById("buktiPembayaran").addEventListener("change", (e) => {
-  if (e.target.files.length > 0) {
-    const fileName = e.target.files[0].name;
-    document.getElementById("previewBukti").innerHTML =
-      `<p class='text-sm text-pink-600'>📎 ${fileName} berhasil diunggah.</p>`;
-    sudahUpload = true;
-  }
+// 📤 Upload bukti pembayaran 
+document.getElementById("buktiPembayaran").addEventListener("change", async (e) => {
+    if (!currentTiketID) {
+        alert("Tiket ID tidak ditemukan! Checkout dulu.");
+        return;
+    }
+
+    const file = e.target.files[0];
+    const fd = new FormData();
+    fd.append("bukti", file);
+    fd.append("tiket_id", currentTiketID);
+
+    let res = await fetch("/upload_bukti", {
+        method: "POST",
+        body: fd
+    });
+
+    let data = await res.json();
+
+    if (data.status === "success") {
+        alert("📁 Bukti pembayaran berhasil diupload! Status berubah menjadi Sudah Bayar.");
+        sudahUpload = true;  // ← PERBAIKAN PENTING!!
+    }
 });
 
 /// 📥 Download bukti pemesanan (versi aesthetic pink pastel & nama user otomatis)

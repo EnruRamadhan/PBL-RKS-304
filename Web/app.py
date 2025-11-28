@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 import pytz
 from flask import flash
+from werkzeug.utils import secure_filename
 
 # ----- Inisialisasi Flask -----
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -294,7 +295,7 @@ def checkout():
     print("📌 DATA MASUK CHECKOUT:", data)
 
     nama_tiket = data.get("nama_tiket")
-    jumlah = int(data.get("jumlah"))
+    jumlah = int(data.get("jumlah") or 0)
     tanggal_kunjungan = data.get("tanggal")
     user_id = session["pelanggan_id"]
 
@@ -303,7 +304,7 @@ def checkout():
 
     try:
         tanggal_kunjungan = datetime.strptime(tanggal_kunjungan, "%Y-%m-%d").date()
-    except:
+    except Exception:
         return jsonify({"error": "Format tanggal kunjungan tidak valid!"}), 400
 
     if tanggal_kunjungan < datetime.now(tz).date():
@@ -317,17 +318,9 @@ def checkout():
         destinasi_db = cursor.fetchone()
 
         if destinasi_db:
-            harga = destinasi_db["harga"]
+            harga = int(destinasi_db["harga"])
         else:
-            destinasi_statis = [
-                "Pantai Nongsa","Pantai Melayu","Pantai Vio-Vio","Pantai Elyora",
-                "Pantai Marina","Pantai Melur","Taman Rusa","Kampung Vietnam",
-                "Mata Kucing","Ocarina Park"
-            ]
-            if nama_tiket not in destinasi_statis:
-                return jsonify({"error": "Destinasi tidak ditemukan"}), 400
-
-            harga_list = {
+            destinasi_statis = {
                 "Pantai Nongsa": 10000,
                 "Pantai Melayu": 15000,
                 "Pantai Vio-Vio": 10000,
@@ -339,9 +332,11 @@ def checkout():
                 "Mata Kucing": 10000,
                 "Ocarina Park": 25000
             }
-            harga = harga_list.get(nama_tiket, 0)
+            if nama_tiket not in destinasi_statis:
+                return jsonify({"error": "Destinasi tidak ditemukan"}), 400
+            harga = int(destinasi_statis[nama_tiket])
 
-        total = harga * jumlah
+        total = int(harga) * int(jumlah)
 
         cursor.execute("""
             INSERT INTO tiket (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga, status)
@@ -350,8 +345,11 @@ def checkout():
 
         conn.commit()
 
+        tiket_id = cursor.lastrowid
+
         return jsonify({
             "status": "success",
+            "tiket_id": tiket_id,
             "nama_tiket": nama_tiket,
             "jumlah": jumlah,
             "harga": harga,
@@ -365,6 +363,70 @@ def checkout():
     finally:
         cursor.close()
         conn.close()
+
+@app.route("/upload_bukti", methods=["POST"])
+def upload_bukti():
+    if "pelanggan_id" not in session:
+        return jsonify({"error": "Not logged in"}), 401
+
+    tiket_id = request.form.get("tiket_id")
+    file = request.files.get("bukti")
+
+    if not tiket_id:
+        return jsonify({"error": "tiket_id missing"}), 400
+
+    if not file:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    upload_dir = os.path.join(app.static_folder, "uploads")
+    os.makedirs(upload_dir, exist_ok=True)
+    filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{secure_filename(file.filename)}"
+    save_path = os.path.join(upload_dir, filename)
+    file.save(save_path)
+
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        # simpan nama file (opsional) dan set status jadi Sudah Bayar
+        cursor.execute("UPDATE tiket SET bukti_file=%s, status=%s WHERE id_tiket=%s", (filename, "Sudah Bayar", tiket_id))
+        conn.commit()
+    except Exception as e:
+        print("❌ Error saat upload_bukti:", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+    return jsonify({"status":"success", "filename": filename})
+
+@app.route("/download_bukti/<int:id_tiket>")
+def download_bukti(id_tiket):
+    if "pelanggan_id" not in session:
+        return jsonify({"error": "Not logged in"}), 401
+
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT bukti_file FROM tiket WHERE id_tiket = %s", (id_tiket,))
+    data = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if not data:
+        return jsonify({"error": "Tiket tidak ditemukan"}), 404
+
+    bukti = data["bukti_file"]
+
+    if not bukti:
+        return jsonify({"error": "Belum upload bukti"}), 400
+
+    file_path = os.path.join(app.static_folder, "uploads", bukti)
+
+    if not os.path.exists(file_path):
+        return jsonify({"error": "File bukti tidak ditemukan"}), 404
+
+    return send_file(file_path, as_attachment=True)
 
 @app.route("/tiket")
 def tiket_saya():
@@ -380,7 +442,7 @@ def tiket_saya():
         cursor = conn.cursor(dictionary=True)
         try:
             cursor.execute("""
-                SELECT id_tiket, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga, total
+                SELECT id_tiket, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga, total, status, bukti_file
                 FROM tiket
                 WHERE user_id = %s
                 ORDER BY tanggal_pembelian DESC

@@ -141,12 +141,6 @@ table.dataTable tbody tr:hover {
                     <td>{{ t.status }}</td>
                     <td>
                         <a href="{{ url_for('admin_delete_tiket', id_tiket=t.id_tiket) }}" style="color:red;">Hapus</a>
-                        {% if t.status == 'Belum Bayar' %}
-                            | <a href="{{ url_for('konfirmasi_tiket', tiket_id=t.id_tiket) }}" style="color:green;">Konfirmasi Bayar</a>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{{ url_for('admin_delete_tiket', id_tiket=t.id_tiket) }}" style="color:red;">Hapus</a>
                     </td>
                 </tr>
                 {% endfor %}
