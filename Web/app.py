@@ -549,10 +549,23 @@ def admin_tiket_page():
         total_items = cursor.fetchone()["total"]
         total_pages = ceil(total_items / per_page)
 
-        cursor.execute(
-            "SELECT * FROM tiket ORDER BY tanggal_pembelian DESC LIMIT %s OFFSET %s",
-            (per_page, offset)
-        )
+        cursor.execute("""
+            SELECT 
+                tiket.id_tiket,
+                pelanggan.nama AS nama_user,
+                tiket.nama_tiket,
+                tiket.tanggal_kunjungan,
+                tiket.jumlah,
+                tiket.harga,
+                tiket.total,
+                tiket.status
+            FROM tiket
+            JOIN pelanggan 
+                ON tiket.user_id = pelanggan.id_pelanggan
+            ORDER BY tiket.tanggal_pembelian DESC
+            LIMIT %s OFFSET %s
+        """, (per_page, offset))
+
         tiket = cursor.fetchall()
     finally:
         cursor.close()
@@ -580,39 +593,6 @@ def admin_delete_tiket(id_tiket):
         conn.close()
     flash("Tiket berhasil dihapus.", "success")
     return redirect(url_for("admin_tiket_page"))
-
-@app.route("/admin/tiket/edit/<int:id_tiket>", methods=["GET", "POST"])
-@login_required_admin
-def admin_edit_tiket(id_tiket):
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-
-    if request.method == "POST":
-        nama_tiket = request.form["nama_tiket"]
-        jumlah = int(request.form["jumlah"])
-        harga = float(request.form["harga"])
-        tanggal_kunjungan = request.form["tanggal_kunjungan"]
-        total = jumlah * harga
-        try:
-            cursor.execute("""
-                UPDATE tiket SET nama_tiket=%s, jumlah=%s, harga=%s, total=%s, tanggal_kunjungan=%s
-                WHERE id_tiket=%s
-            """, (nama_tiket, jumlah, harga, total, tanggal_kunjungan, id_tiket))
-            conn.commit()
-        finally:
-            cursor.close()
-            conn.close()
-        flash("Tiket berhasil diupdate.", "success")
-        return redirect(url_for("admin_tiket_page"))
-
-    try:
-        cursor.execute("SELECT * FROM tiket WHERE id_tiket=%s", (id_tiket,))
-        tiket = cursor.fetchone()
-    finally:
-        cursor.close()
-        conn.close()
-
-    return render_template("edit_tiket.html", tiket=tiket)
 
 @app.route("/admin/konfirmasi/<int:tiket_id>")
 def konfirmasi_tiket(tiket_id):
@@ -672,36 +652,6 @@ def admin_delete_user(id_user):
         conn.close()
     flash("User berhasil dihapus.", "success")
     return redirect(url_for("admin_user"))
-
-@app.route("/admin/user/edit/<int:id_user>", methods=["GET","POST"])
-@login_required_admin
-def admin_edit_user(id_user):
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-
-    if request.method == "POST":
-        nama = request.form["nama"]
-        username = request.form["username"]
-        email = request.form["email"]
-        try:
-            cursor.execute("""
-                UPDATE pelanggan SET nama=%s, username=%s, email=%s WHERE id_pelanggan=%s
-            """, (nama, username, email, id_user))
-            conn.commit()
-        finally:
-            cursor.close()
-            conn.close()
-        flash("User berhasil diupdate.", "success")
-        return redirect(url_for("admin_user"))
-
-    try:
-        cursor.execute("SELECT * FROM pelanggan WHERE id_pelanggan=%s", (id_user,))
-        user = cursor.fetchone()
-    finally:
-        cursor.close()
-        conn.close()
-
-    return render_template("edit_user.html", user=user)
 
 @app.route("/admin/settings", methods=["GET","POST"])
 @login_required_admin
