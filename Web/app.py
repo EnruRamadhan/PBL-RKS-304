@@ -3,11 +3,16 @@ import mysql.connector
 import bcrypt
 from functools import wraps
 from math import ceil
+from dotenv import load_dotenv
 import os
 from datetime import datetime
 import pytz
 from flask import flash
 from werkzeug.utils import secure_filename
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+env_path = os.path.join(basedir, 'connectionDB.env')
+load_dotenv(env_path)
 
 # ----- Inisialisasi Flask -----
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -20,7 +25,7 @@ db_config = {
     "user": os.environ.get("DB_USER"),
     "password": os.environ.get("DB_PASS"),
     "database": os.environ.get("DB_NAME"),
-    "port": int(os.environ.get("DB_PORT")),
+    "port": int(os.environ.get("DB_PORT", 3307)),
     "auth_plugin": "mysql_native_password"
 }
 
