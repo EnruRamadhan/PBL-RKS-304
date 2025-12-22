@@ -16,11 +16,11 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 3600000  # 1 hour
 
 # ----- Konfigurasi koneksi ke database -----
 db_config = {
-    "host": os.environ.get("DB_HOST", "localhost"),
-    "user": os.environ.get("DB_USER", "root"),
-    "password": os.environ.get("DB_PASS", "root123"),
-    "database": os.environ.get("DB_NAME", "wisata_db"),
-    "port": int(os.environ.get("DB_PORT", 3306)),
+    "host": os.environ.get("DB_HOST"),
+    "user": os.environ.get("DB_USER"),
+    "password": os.environ.get("DB_PASS"),
+    "database": os.environ.get("DB_NAME"),
+    "port": int(os.environ.get("DB_PORT")),
     "auth_plugin": "mysql_native_password"
 }
 
