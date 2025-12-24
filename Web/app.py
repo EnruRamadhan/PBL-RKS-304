@@ -581,39 +581,6 @@ def admin_delete_tiket(id_tiket):
     flash("Tiket berhasil dihapus.", "success")
     return redirect(url_for("admin_tiket_page"))
 
-@app.route("/admin/tiket/edit/<int:id_tiket>", methods=["GET", "POST"])
-@login_required_admin
-def admin_edit_tiket(id_tiket):
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-
-    if request.method == "POST":
-        nama_tiket = request.form["nama_tiket"]
-        jumlah = int(request.form["jumlah"])
-        harga = float(request.form["harga"])
-        tanggal_kunjungan = request.form["tanggal_kunjungan"]
-        total = jumlah * harga
-        try:
-            cursor.execute("""
-                UPDATE tiket SET nama_tiket=%s, jumlah=%s, harga=%s, total=%s, tanggal_kunjungan=%s
-                WHERE id_tiket=%s
-            """, (nama_tiket, jumlah, harga, total, tanggal_kunjungan, id_tiket))
-            conn.commit()
-        finally:
-            cursor.close()
-            conn.close()
-        flash("Tiket berhasil diupdate.", "success")
-        return redirect(url_for("admin_tiket_page"))
-
-    try:
-        cursor.execute("SELECT * FROM tiket WHERE id_tiket=%s", (id_tiket,))
-        tiket = cursor.fetchone()
-    finally:
-        cursor.close()
-        conn.close()
-
-    return render_template("edit_tiket.html", tiket=tiket)
-
 @app.route("/admin/konfirmasi/<int:tiket_id>")
 def konfirmasi_tiket(tiket_id):
     conn = get_db()
