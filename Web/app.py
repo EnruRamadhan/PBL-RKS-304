@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 import mysql.connector
 import bcrypt
 from functools import wraps
@@ -14,18 +14,16 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 env_path = os.path.join(basedir, 'connectionDB.env')
 load_dotenv(env_path)
 
-# ----- Inisialisasi Flask -----
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.environ.get("SECRET_KEY", "secret-key-default")
-app.config['PERMANENT_SESSION_LIFETIME'] = 3600000  # 1 hour
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600000
 
-# ----- Konfigurasi koneksi ke database -----
 db_config = {
     "host": os.environ.get("DB_HOST"),
     "user": os.environ.get("DB_USER"),
     "password": os.environ.get("DB_PASS"),
     "database": os.environ.get("DB_NAME"),
-    "port": int(os.environ.get("DB_PORT", 3307)),
+    "port": int(os.environ.get("DB_PORT")),
     "auth_plugin": "mysql_native_password"
 }
 
@@ -61,7 +59,6 @@ def init_database():
     if conn:
         cursor = conn.cursor()
         try:
-            # create pelanggan schema that matches existing schema (safe: IF NOT EXISTS)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS pelanggan (
                     id_pelanggan INT AUTO_INCREMENT PRIMARY KEY,
@@ -89,15 +86,12 @@ def login_required_pelanggan(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Landing page
 @app.route('/')
 @app.route('/landing')
 def landing():
-    # Clear session jika ada
     session.clear()
     return render_template('landing.html')
 
-# Home page setelah login
 @app.route("/home")
 def home():
 
@@ -198,7 +192,6 @@ def login():
                     error = "Password admin salah!"
                     return render_template("login.html", error=error)
 
-            # cek pelanggan
             cursor.execute("SELECT id_pelanggan, username, password FROM pelanggan WHERE username=%s", (username,))
             user = cursor.fetchone()
             if user and bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
@@ -234,7 +227,6 @@ def register():
 
         print(f"🔍 Registration attempt - Username: {username}")
 
-        # Validasi
         if not all([username, email, password, confirm_password]):
             error = "Semua field wajib diisi!"
         elif password != confirm_password:
@@ -242,7 +234,6 @@ def register():
         elif len(password) < 6:
             error = "Password minimal 6 karakter!"
         else:
-            # Karena tidak ada nama, pakai username sebagai nama default
             nama = username  
 
             hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
@@ -392,7 +383,6 @@ def upload_bukti():
     conn = get_db()
     cursor = conn.cursor()
     try:
-        # simpan nama file (opsional) dan set status jadi Sudah Bayar
         cursor.execute("UPDATE tiket SET bukti_file=%s, status=%s WHERE id_tiket=%s", (filename, "Sudah Bayar", tiket_id))
         conn.commit()
     except Exception as e:
@@ -463,12 +453,10 @@ def tiket_saya():
 
     return render_template("tiket.html", tickets=tickets)
 
-# Kontak
 @app.route('/kontak')
 def kontak():
     return render_template('kontak.html')
 
-# Logout
 @app.route('/logout')
 def logout():
     session.clear()
@@ -653,32 +641,6 @@ def admin_delete_user(id_user):
     flash("User berhasil dihapus.", "success")
     return redirect(url_for("admin_user"))
 
-@app.route("/admin/settings", methods=["GET","POST"])
-@login_required_admin
-def admin_settings():
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    if request.method == "POST":
-        old_password = request.form["old_password"]
-        new_password = request.form["new_password"]
-        confirm_password = request.form["confirm_password"]
-
-        cursor.execute("SELECT password FROM admin WHERE id_admin=%s", (session['admin_id'],))
-        current_password_hash = cursor.fetchone()['password']
-
-        if not bcrypt.checkpw(old_password.encode('utf-8'), current_password_hash.encode('utf-8')):
-            flash("Password lama salah.", "danger")
-        elif new_password != confirm_password:
-            flash("Password baru tidak cocok.", "danger")
-        else:
-            hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-            cursor.execute("UPDATE admin SET password=%s WHERE id_admin=%s", (hashed, session['admin_id']))
-            conn.commit()
-            flash("Password berhasil diupdate.", "success")
-    cursor.close()
-    conn.close()
-    return render_template("admin.html", section="settings", username=session.get("admin_username"))
-
 @app.route("/admin/destinasi", methods=["GET", "POST"])
 @login_required_admin
 def admin_destinasi():
@@ -731,11 +693,8 @@ def admin_delete_destinasi(id_destinasi):
     flash("Destinasi berhasil dihapus.", "success")
     return redirect(url_for("admin_destinasi"))
 
-# ------------------------------
-# Jalankan aplikasi
-# ------------------------------
 if __name__ == '__main__':
-    print("🚀 Starting Flask application...")
+    print("Starting Flask application...")
     print("Testing database connection...")
     
     if test_connection():
