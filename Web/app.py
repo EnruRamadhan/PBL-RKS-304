@@ -694,14 +694,20 @@ def admin_delete_destinasi(id_destinasi):
     return redirect(url_for("admin_destinasi"))
 
 if __name__ == '__main__':
-    print("Starting Flask application...")
-    print("Testing database connection...")
-    
-    if test_connection():
-        print("Initializing database...")
-        init_database()
-        print("📱 Alternative: http://127.0.0.1:5000")
-        print("⚡ Debug mode: ON")
+    # Cek jika ini adalah child process dari reloader
+    import os
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        # Ini adalah process kedua (reloader), cukup jalankan server
         app.run(host='0.0.0.0', port=5000, debug=True)
     else:
-        print("❌ Cannot start application due to database connection issue")
+        # Ini adalah process pertama, jalankan inisialisasi
+        print("Starting Flask application...")
+        print("Testing database connection...")
+        
+        if test_connection():
+            print("Initializing database...")
+            init_database()
+            print("⚡ Debug mode: ON")
+            app.run(host='0.0.0.0', port=5000, debug=True)
+        else:
+            print("❌ Cannot start application due to database connection issue")
