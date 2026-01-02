@@ -1,27 +1,13 @@
 let sudahCheckout = false;
 let sudahUpload = false;
+let currentTiketID = null;
 
-// 💰 Daftar harga destinasi
-const hargaList = {
-  "Pantai Nongsa": 10000,
-  "Pantai Melayu": 15000,
-  "Pantai Vio-Vio": 10000,
-  "Pantai Elyora": 10000,
-  "Pantai Marina": 20000,
-  "Pantai Melur": 5000,
-  "Taman Rusa": 5000,
-  "Kampung Vietnam": 20000,
-  "Mata Kucing": 10000,
-  "Ocarina Park": 25000,
-};
-
-// 🧮 Update total harga otomatis
 function updateTotalHarga() {
   const destinasi = document.getElementById("destinasiSelect").value;
   const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
-  const harga = hargaList[destinasi] || 0;
+  const select = document.getElementById("destinasiSelect");
+  const harga = parseInt(select.options[select.selectedIndex].dataset.harga)
   const total = harga * jumlah;
-
   const previewHarga = document.getElementById("previewHarga");
   if (destinasi && jumlah > 0) {
     previewHarga.innerText = `Total Harga: Rp${total.toLocaleString("id-ID")}`;
@@ -30,44 +16,72 @@ function updateTotalHarga() {
   }
 }
 
-// 🧾 Checkout
-function checkout() {
-  const destinasi = document.getElementById("destinasiSelect").value;
+async function checkout() {
+  const destinasiSelect = document.getElementById("destinasiSelect");
+  const destinasi = destinasiSelect.value;
+  const harga = parseInt(destinasiSelect.options[destinasiSelect.selectedIndex].dataset.harga) || 0;
   const tanggal = document.getElementById("tanggal").value;
   const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
+  const namaPemesan = document.getElementById("namaPemesan").value.trim();
 
-  if (!destinasi || !tanggal || jumlah < 1) {
+  if (!namaPemesan || !destinasi || !tanggal || jumlah < 1) {
     alert("⚠️ Lengkapi semua data pemesanan!");
     return;
   }
 
-  const harga = hargaList[destinasi] || 0;
-  const total = harga * jumlah;
+  try {
+    const res = await fetch("/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nama_tiket: destinasi,
+        jumlah: jumlah,
+        harga: harga,
+        tanggal: tanggal
+      })
+    });
 
-  document.getElementById("hasilBooking").innerText =
-    `Bukti Pemesanan Tiket Wisata\n\n` +
-    `Destinasi: ${destinasi}\n` +
-    `Tanggal: ${tanggal}\n` +
-    `Jumlah Tiket: ${jumlah}\n` +
-    `Harga per Tiket: Rp${harga.toLocaleString()}\n` +
-    `Total Bayar: Rp${total.toLocaleString()}`;
+    const data = await res.json();
+    window.currentTiketID = data.tiket_id;
 
-  document.getElementById("hasilBox").classList.remove("hidden");
-  sudahCheckout = true;
-  alert("✅ Checkout berhasil! Silakan upload bukti pembayaran.");
+    if (!res.ok) {
+      alert("❌ Checkout gagal: " + (data.error || data.message));
+      return;
+    }
+
+    alert("✅ Checkout berhasil!");
+    sudahCheckout = true;
+    currentTiketID = data.tiket_id;
+    console.log("Tiket ID:", currentTiketID);
+  } catch (err) {
+    alert("❌ Error server.");
+  }
 }
 
-// 📤 Upload bukti pembayaran
-document.getElementById("buktiPembayaran").addEventListener("change", (e) => {
-  if (e.target.files.length > 0) {
-    const fileName = e.target.files[0].name;
-    document.getElementById("previewBukti").innerHTML =
-      `<p class='text-sm text-pink-600'>📎 ${fileName} berhasil diunggah.</p>`;
-    sudahUpload = true;
-  }
+document.getElementById("buktiPembayaran").addEventListener("change", async (e) => {
+    if (!currentTiketID) {
+        alert("Tiket ID tidak ditemukan! Checkout dulu.");
+        return;
+    }
+
+    const file = e.target.files[0];
+    const fd = new FormData();
+    fd.append("bukti", file);
+    fd.append("tiket_id", currentTiketID);
+
+    let res = await fetch("/upload_bukti", {
+        method: "POST",
+        body: fd
+    });
+
+    let data = await res.json();
+
+    if (data.status === "success") {
+        alert("📁 Bukti pembayaran berhasil diupload! Status berubah menjadi Sudah Bayar.");
+        sudahUpload = true;
+    }
 });
 
-/// 📥 Download bukti pemesanan (versi aesthetic pink pastel & nama user otomatis)
 function downloadBukti() {
   if (!sudahCheckout) {
     alert("⚠️ Silakan lakukan checkout terlebih dahulu!");
@@ -78,117 +92,104 @@ function downloadBukti() {
     return;
   }
 
-  // Ambil data user & form
-  const namaUser = localStorage.getItem("namaUser") || "Nama Pemesan";
+  const namaUser = document.getElementById("namaPemesan").value.trim() || "Nama Pemesan";
   const destinasi = document.getElementById("destinasiSelect")?.value || "-";
   const tanggalRaw = document.getElementById("tanggal")?.value || "-";
   const tanggal = tanggalRaw !== "-" 
-    ? new Date(tanggalRaw).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) 
+    ? new Date(tanggalRaw).toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }) 
     : "-";
   const jumlahTiket = parseInt(document.getElementById("jumlah")?.value) || 0;
-const hargaTiket = hargaList[destinasi] || 0;
-const totalBayar = hargaTiket * jumlahTiket;
+  const hargaTiket = parseInt(
+    document.querySelector(`#destinasiSelect option[value="${destinasi}"]`)?.dataset.harga
+  ) || 0;
+  const totalBayar = hargaTiket * jumlahTiket;
 
-  if (!window.jspdf) {
-    alert("⚠️ jsPDF belum ter-load!");
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert("⚠️ jsPDF belum ter-load! Pastikan CDN jsPDF sudah ditambahkan di file HTML kamu.");
     return;
   }
+
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 40;
-
-  // 🌸 Background pastel
-  doc.setFillColor("#FFE4EC");
-  doc.rect(0, 0, pageWidth, pageHeight, "F");
-
-  // 🎀 Header
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.setTextColor("#D46482");
-  doc.text("BATAM TRAVEL", pageWidth / 2, 40, { align: "center" });
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text("www.batamtravel.co.id | info@batamtravel.co.id | +62 812-3456-7890", pageWidth / 2, 55, { align: "center" });
+  const doc = new jsPDF("p", "mm", "a4");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("Bukti Pemesanan Tiket Wisata", pageWidth / 2, 80, { align: "center" });
+  doc.setTextColor(234, 84, 128);
+  doc.text("BUKTI PEMESANAN TIKET WISATA", 105, 25, { align: "center" });
 
-  doc.setDrawColor("#D46482");
-  doc.setLineWidth(1);
-  doc.line(margin, 90, pageWidth - margin, 90);
+  doc.setDrawColor(255, 182, 193);
+  doc.line(20, 30, 190, 30);
 
-  // 🧾 Detail Pemesanan di box
-  let y = 110;
-  doc.setDrawColor("#D46482");
-  doc.setLineWidth(0.8);
-  doc.rect(margin, y, pageWidth - 2 * margin, 120); // box detail
+  const waktuCetak = new Date().toLocaleString("id-ID", {
+    dateStyle: "long",
+    timeStyle: "short",
+  });
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Dicetak pada: ${waktuCetak}`, 20, 38);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
-  doc.setTextColor("#333");
-  let textX = margin + 10;
-  let textY = y + 25;
-  doc.text(`Atas Nama       : ${namaUser}`, textX, textY);
-  textY += 18;
-  doc.text(`Destinasi       : ${destinasi}`, textX, textY);
-  textY += 18;
-  doc.text(`Tanggal Kunjungan: ${tanggal}`, textX, textY);
-  textY += 18;
-  doc.text(`Jumlah Tiket    : ${jumlahTiket}`, textX, textY);
-  textY += 18;
-  doc.text(`Harga per Tiket : Rp ${parseFloat(hargaTiket).toLocaleString('id-ID')}`, textX, textY);
-  textY += 18;
-  doc.text(`Total Bayar     : Rp ${parseFloat(totalBayar).toLocaleString('id-ID')}`, textX, textY);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Terima kasih, ${namaUser}!`, 20, 52);
+  doc.text("Telah mempercayakan perjalanan wisatanya bersama kami.", 20, 59);
 
-  // 📋 Catatan Penting
-  y += 140;
-  const noteHeight = 120;
-  doc.setFillColor("#FFD9E6");
-  doc.roundedRect(margin, y, pageWidth - 2 * margin, noteHeight, 8, 8, "F");
-
-  let noteY = y + 20;
   doc.setFont("helvetica", "bold");
-  doc.setTextColor("#D46482");
-  doc.text("Catatan Penting:", margin + 10, noteY);
+  doc.setFontSize(13);
+  doc.setTextColor(50, 50, 50);
+  doc.text("Detail Pemesanan:", 20, 75);
 
-  noteY += 18;
   doc.setFont("helvetica", "normal");
-  doc.setTextColor("#333");
-  const notes = [
-    "Harap menunjukkan bukti pemesanan ini saat check-in di lokasi wisata.",
-    "Tiket hanya berlaku pada tanggal yang tertera dan tidak dapat dipindah tangankan.",
-    "Pembatalan atau perubahan jadwal dapat dilakukan maksimal 24 jam sebelum waktu kunjungan.",
-    "Kebijakan refund mengikuti ketentuan yang berlaku di Batam Travel.",
-    "Pastikan untuk tiba 15 menit sebelum waktu kunjungan untuk proses check-in."
+  doc.setFontSize(12);
+  let y = 85;
+  const detail = [
+    ["Nama Pemesan", namaUser],
+    ["Destinasi", destinasi],
+    ["Tanggal Kunjungan", tanggal],
+    ["Jumlah Tiket", jumlahTiket.toString()],
+    ["Harga per Tiket", `Rp${hargaTiket.toLocaleString("id-ID")}`],
+    ["Total Bayar", `Rp${totalBayar.toLocaleString("id-ID")}`],
   ];
-  notes.forEach(note => {
-    doc.text("• " + note, margin + 15, noteY);
-    noteY += 16;
+  detail.forEach(([label, value]) => {
+    doc.text(`${label}:`, 25, y);
+    doc.text(value, 90, y);
+    y += 9;
   });
 
-  // 💬 Ucapan Terima Kasih
-  noteY += 10;
+  y += 10;
   doc.setFont("helvetica", "italic");
-  doc.setTextColor("#555");
-  doc.text("Terima kasih telah memesan melalui platform kami.", margin + 10, noteY);
-  noteY += 15;
-  doc.text("Nikmati liburanmu dan tetap jaga kebersihan lingkungan.", margin + 10, noteY);
+  doc.setTextColor(90, 90, 90);
+  doc.text("Catatan:", 20, y);
+  y += 6;
+  const notes = [
+    "• Simpan bukti ini sebagai tanda sah pemesanan tiket.",
+    "• Harap tunjukkan bukti ini kepada petugas saat check-in.",
+    "• Pembatalan tiket mengikuti kebijakan pengelola destinasi.",
+  ];
+  notes.forEach((n) => {
+    doc.text(n, 25, y);
+    y += 6;
+  });
 
-  // 🩷 Footer
+  doc.setDrawColor(255, 182, 193);
+  doc.line(20, 280, 190, 280);
   doc.setFontSize(10);
-  doc.setTextColor("#D46482");
-  doc.text("© 2025 Batam Travel | Semua hak dilindungi", pageWidth / 2, pageHeight - 30, { align: "center" });
+  doc.setTextColor(234, 84, 128);
+  doc.text("PBL RKS-304 | Sistem Informasi Destinasi Wisata", 105, 287, {
+    align: "center",
+  });
 
-  // Download PDF
-  doc.save(`Bukti_Pemesanan_${namaUser.replace(/\s+/g, "_")}.pdf`);
+  const namaFile = `Bukti_Pemesanan_${destinasi.replace(/\s+/g, "_")}.pdf`;
+  doc.save(namaFile);
   alert("✅ Bukti pemesanan berhasil diunduh!");
 }
 
-// 🔎 Fitur pencarian destinasi
 document.getElementById("searchInput").addEventListener("input", function () {
   const query = this.value.toLowerCase();
   const cards = document.querySelectorAll(".destinasi-card");
@@ -198,6 +199,20 @@ document.getElementById("searchInput").addEventListener("input", function () {
   });
 });
 
-// ⏱️ Update harga otomatis saat input berubah
-document.getElementById("destinasiSelect").addEventListener("change", updateTotalHarga);
-document.getElementById("jumlah").addEventListener("input", updateTotalHarga);
+document.getElementById('jumlah').addEventListener('input', hitungTotal);
+document.getElementById('destinasiSelect').addEventListener('change', hitungTotal);
+
+function hitungTotal() {
+    let select = document.getElementById('destinasiSelect');
+    let jumlah = document.getElementById('jumlah').value;
+
+    let harga = select.options[select.selectedIndex].getAttribute('data-harga');
+
+    if (harga && jumlah) {
+        let total = parseInt(harga) * parseInt(jumlah);
+        document.getElementById('previewHarga').innerText =
+            "Total: Rp" + total.toLocaleString("id-ID");
+    } else {
+        document.getElementById('previewHarga').innerText = "";
+    }
+}

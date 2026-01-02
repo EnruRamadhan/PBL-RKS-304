@@ -4,11 +4,65 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kontak - Pesona Destinasi Wisata Batam</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/kontak.css') }}" />
 </head>
 
 <body>
-  <main class="container">
+  <!-- HEADER / NAVIGATION -->
+<header class="relative bg-gradient-to-r from-rose-100 via-orange-100 to-sky-100 
+backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
+
+    <div class="flex flex-wrap justify-between items-center px-10 py-5">
+
+        <!-- LOGO DAN JUDUL -->
+        <div class="flex items-center gap-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" 
+                 alt="Logo" class="w-12 h-12 drop-shadow-md">
+
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">
+                    <span class="text-rose-400">Pesona Destinasi</span> Wisata Batam
+                </h1>
+                <p class="text-sm text-gray-600 italic">
+                    Temukan dan Booking Destinasi Wisata Favoritmu di Batam 🌺
+                </p>
+            </div>
+        </div>
+
+        <!-- NAVBAR -->
+        <nav class="hidden md:flex gap-8 font-medium text-gray-700">
+            <a href="{{ url_for('home') }}" class="relative group">
+                Beranda
+                <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r 
+                from-rose-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
+            </a>
+
+            <a href="{{ url_for('tiket_saya') }}" class="relative group">
+                Tiket Saya
+                <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r 
+                from-pink-300 to-orange-300 group-hover:w-full transition-all duration-300"></span>
+            </a>
+
+            <a href="{{ url_for('kontak') }}" class="relative group">
+                Kontak
+                <span class="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r 
+                from-sky-300 to-rose-300 group-hover:w-full transition-all duration-300"></span>
+            </a>
+        </nav>
+
+        <!-- LOGOUT BUTTON -->
+        <a href="{{ url_for('logout') }}"
+           class="bg-gradient-to-r from-pink-300 via-orange-300 to-amber-300
+           text-white font-semibold px-5 py-2 rounded-xl shadow-md hover:scale-105 
+           hover:shadow-lg transition-all">
+           Logout
+        </a>
+    </div>
+
+</header>
+
+  <main class="kontak-container">
     <section class="contact-wrap">
       <!-- Kartu utama: kontak & form -->
       <aside class="card">
