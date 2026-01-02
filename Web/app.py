@@ -9,6 +9,9 @@ from datetime import datetime
 import pytz
 from flask import flash
 from werkzeug.utils import secure_filename
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 env_path = os.path.join(basedir, 'connectionDB.env')
@@ -176,7 +179,6 @@ def login():
 
         cursor = conn.cursor(dictionary=True, buffered=True)
         try:
-            # cek admin
             cursor.execute("SELECT * FROM admin WHERE username=%s", (username,))
             admin = cursor.fetchone()
             if admin:
@@ -453,9 +455,50 @@ def tiket_saya():
 
     return render_template("tiket.html", tickets=tickets)
 
-@app.route('/kontak')
+@app.route("/kontak", methods=["GET", "POST"])
 def kontak():
-    return render_template('kontak.html')
+    if request.method == "POST":
+        nama = request.form["nama"]
+        email = request.form["email"]
+        whatsapp = request.form["whatsapp"]
+        perihal = request.form["perihal"]
+        pesan = request.form["pesan"]
+
+        EMAIL_PENGIRIM = "pesonadestinasibatam@gmail.com"
+        EMAIL_PENERIMA = "pesonadestinasibatam@gmail.com"
+        PASSWORD = "pvkyjevibdkhjzea"
+
+        msg = MIMEMultipart()
+        msg["From"] = EMAIL_PENGIRIM
+        msg["To"] = EMAIL_PENERIMA
+        msg["Subject"] = f"[Kontak Website] {perihal}"
+
+        body = f"""
+        Nama      : {nama}
+        Email     : {email}
+        WhatsApp  : {whatsapp}
+
+        Pesan:
+        {pesan}
+        """
+
+        msg.attach(MIMEText(body, "plain"))
+
+        try:
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server.starttls()
+            server.login(EMAIL_PENGIRIM, PASSWORD)
+            server.send_message(msg)
+            server.quit()
+
+            flash("Pesan berhasil dikirim! Kami akan segera menghubungi kamu.", "success")
+
+        except Exception as e:
+            flash("Gagal mengirim pesan. Silakan coba lagi.", "error")
+
+        return redirect(url_for("kontak"))
+
+    return render_template("kontak.html")
 
 @app.route('/logout')
 def logout():

@@ -9,13 +9,11 @@
 </head>
 
 <body>
-  <!-- HEADER / NAVIGATION -->
 <header class="relative bg-gradient-to-r from-rose-100 via-orange-100 to-sky-100 
 backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
 
     <div class="flex flex-wrap justify-between items-center px-10 py-5">
 
-        <!-- LOGO DAN JUDUL -->
         <div class="flex items-center gap-4">
             <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" 
                  alt="Logo" class="w-12 h-12 drop-shadow-md">
@@ -30,7 +28,6 @@ backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
             </div>
         </div>
 
-        <!-- NAVBAR -->
         <nav class="hidden md:flex gap-8 font-medium text-gray-700">
             <a href="{{ url_for('home') }}" class="relative group">
                 Beranda
@@ -51,7 +48,6 @@ backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
             </a>
         </nav>
 
-        <!-- LOGOUT BUTTON -->
         <a href="{{ url_for('logout') }}"
            class="bg-gradient-to-r from-pink-300 via-orange-300 to-amber-300
            text-white font-semibold px-5 py-2 rounded-xl shadow-md hover:scale-105 
@@ -64,7 +60,6 @@ backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
 
   <main class="kontak-container">
     <section class="contact-wrap">
-      <!-- Kartu utama: kontak & form -->
       <aside class="card">
         <h3>📞 Kontak Kami</h3>
         <p class="small">
@@ -83,7 +78,7 @@ backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
           <div class="icon">✉️</div>
           <div class="meta">
             <b>Email</b>
-            pesonadestinasi.batam@gmail.com
+            pesonadestinasibatam@gmail.com
           </div>
         </div>
 
@@ -97,18 +92,18 @@ backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
 
         <hr />
 
-        <form class="contact-form" action="#" method="POST" onsubmit="handleSubmit(event)">
+        <form class="contact-form" action="{{ url_for('kontak') }}" method="POST">
           <label for="name">Nama</label>
-          <input id="name" name="name"/>
+          <input id="name" name="nama" required />
 
           <label for="email">Email</label>
-          <input id="email" name="email" type="email"/>
+          <input id="email" name="email" type="email" required />
 
           <label for="phone">No. WhatsApp</label>
-          <input id="phone" name="phone"/>
+          <input id="phone" name="whatsapp" required />
 
           <label for="subject">Perihal</label>
-          <select id="subject" name="subject">
+          <select id="subject" name="perihal">
             <option>Pertanyaan umum</option>
             <option>Reservasi & Pembayaran</option>
             <option>Laporan masalah</option>
@@ -116,7 +111,8 @@ backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
           </select>
 
           <label for="message">Pesan</label>
-          <textarea id="message" name="message" placeholder="Tuliskan pesanmu..." required></textarea>
+          <textarea id="message" name="pesan"
+                    placeholder="Tuliskan pesanmu..." required></textarea>
 
           <div class="button-row">
             <button type="submit" class="btn btn-cta">Kirim Pesan</button>
@@ -128,7 +124,6 @@ backdrop-blur-md shadow-md rounded-b-3xl border border-white/40">
           Kami akan membalas dalam 1x24 jam kerja. Untuk bantuan cepat, silakan hubungi WhatsApp kami.
         </p>
 
-        <!-- Tombol kembali ke home -->
         <div class="back-home">
           <a href="{{ url_for('index_page') }}" class="btn btn-outline">🏠 Kembali ke Beranda</a>
         </div>
