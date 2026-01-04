@@ -2,7 +2,6 @@ let sudahCheckout = false;
 let sudahUpload = false;
 let currentTiketID = null;
 
-// 🧮 Update total harga otomatis
 function updateTotalHarga() {
   const destinasi = document.getElementById("destinasiSelect").value;
   const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
@@ -59,7 +58,6 @@ async function checkout() {
   }
 }
 
-// 📤 Upload bukti pembayaran 
 document.getElementById("buktiPembayaran").addEventListener("change", async (e) => {
     if (!currentTiketID) {
         alert("Tiket ID tidak ditemukan! Checkout dulu.");
@@ -80,11 +78,10 @@ document.getElementById("buktiPembayaran").addEventListener("change", async (e) 
 
     if (data.status === "success") {
         alert("📁 Bukti pembayaran berhasil diupload! Status berubah menjadi Sudah Bayar.");
-        sudahUpload = true;  // ← PERBAIKAN PENTING!!
+        sudahUpload = true;
     }
 });
 
-/// 📥 Download bukti pemesanan (versi aesthetic pink pastel & nama user otomatis)
 function downloadBukti() {
   if (!sudahCheckout) {
     alert("⚠️ Silakan lakukan checkout terlebih dahulu!");
@@ -95,7 +92,6 @@ function downloadBukti() {
     return;
   }
 
-  // 🧾 Ambil data user & form
   const namaUser = document.getElementById("namaPemesan").value.trim() || "Nama Pemesan";
   const destinasi = document.getElementById("destinasiSelect")?.value || "-";
   const tanggalRaw = document.getElementById("tanggal")?.value || "-";
@@ -113,17 +109,14 @@ function downloadBukti() {
   ) || 0;
   const totalBayar = hargaTiket * jumlahTiket;
 
-  // 🧩 Pastikan jsPDF tersedia
   if (!window.jspdf || !window.jspdf.jsPDF) {
     alert("⚠️ jsPDF belum ter-load! Pastikan CDN jsPDF sudah ditambahkan di file HTML kamu.");
     return;
   }
 
-  // ✨ Buat PDF baru
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p", "mm", "a4");
 
-  // 🎀 Header
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
   doc.setTextColor(234, 84, 128);
@@ -132,7 +125,6 @@ function downloadBukti() {
   doc.setDrawColor(255, 182, 193);
   doc.line(20, 30, 190, 30);
 
-  // 🕒 Waktu cetak
   const waktuCetak = new Date().toLocaleString("id-ID", {
     dateStyle: "long",
     timeStyle: "short",
@@ -142,14 +134,12 @@ function downloadBukti() {
   doc.setTextColor(100, 100, 100);
   doc.text(`Dicetak pada: ${waktuCetak}`, 20, 38);
 
-  // 🩷 Ucapan terima kasih
   doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
   doc.text(`Terima kasih, ${namaUser}!`, 20, 52);
   doc.text("Telah mempercayakan perjalanan wisatanya bersama kami.", 20, 59);
 
-  // 📋 Detail Pemesanan
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.setTextColor(50, 50, 50);
@@ -172,7 +162,6 @@ function downloadBukti() {
     y += 9;
   });
 
-  // 📝 Catatan
   y += 10;
   doc.setFont("helvetica", "italic");
   doc.setTextColor(90, 90, 90);
@@ -188,7 +177,6 @@ function downloadBukti() {
     y += 6;
   });
 
-  // 🪷 Footer
   doc.setDrawColor(255, 182, 193);
   doc.line(20, 280, 190, 280);
   doc.setFontSize(10);
@@ -197,13 +185,11 @@ function downloadBukti() {
     align: "center",
   });
 
-  // 💾 Simpan PDF
   const namaFile = `Bukti_Pemesanan_${destinasi.replace(/\s+/g, "_")}.pdf`;
   doc.save(namaFile);
   alert("✅ Bukti pemesanan berhasil diunduh!");
 }
 
-// 🔎 Fitur pencarian destinasi
 document.getElementById("searchInput").addEventListener("input", function () {
   const query = this.value.toLowerCase();
   const cards = document.querySelectorAll(".destinasi-card");

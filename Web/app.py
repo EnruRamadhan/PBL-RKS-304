@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 import mysql.connector
 import bcrypt
 from functools import wraps
@@ -9,17 +9,18 @@ from datetime import datetime
 import pytz
 from flask import flash
 from werkzeug.utils import secure_filename
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 env_path = os.path.join(basedir, 'connectionDB.env')
 load_dotenv(env_path)
 
-# ----- Inisialisasi Flask -----
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.environ.get("SECRET_KEY", "secret-key-default")
-app.config['PERMANENT_SESSION_LIFETIME'] = 3600000  # 1 hour
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600000
 
-# ----- Konfigurasi koneksi ke database -----
 db_config = {
     "host": os.environ.get("DB_HOST"),
     "user": os.environ.get("DB_USER"),
@@ -61,7 +62,6 @@ def init_database():
     if conn:
         cursor = conn.cursor()
         try:
-            # create pelanggan schema that matches existing schema (safe: IF NOT EXISTS)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS pelanggan (
                     id_pelanggan INT AUTO_INCREMENT PRIMARY KEY,
@@ -89,15 +89,12 @@ def login_required_pelanggan(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Landing page
 @app.route('/')
 @app.route('/landing')
 def landing():
-    # Clear session jika ada
     session.clear()
     return render_template('landing.html')
 
-# Home page setelah login
 @app.route("/home")
 def home():
 
@@ -182,7 +179,6 @@ def login():
 
         cursor = conn.cursor(dictionary=True, buffered=True)
         try:
-            # cek admin
             cursor.execute("SELECT * FROM admin WHERE username=%s", (username,))
             admin = cursor.fetchone()
             if admin:
@@ -198,7 +194,6 @@ def login():
                     error = "Password admin salah!"
                     return render_template("login.html", error=error)
 
-            # cek pelanggan
             cursor.execute("SELECT id_pelanggan, username, password FROM pelanggan WHERE username=%s", (username,))
             user = cursor.fetchone()
             if user and bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
@@ -234,7 +229,6 @@ def register():
 
         print(f"🔍 Registration attempt - Username: {username}")
 
-        # Validasi
         if not all([username, email, password, confirm_password]):
             error = "Semua field wajib diisi!"
         elif password != confirm_password:
@@ -242,7 +236,6 @@ def register():
         elif len(password) < 6:
             error = "Password minimal 6 karakter!"
         else:
-            # Karena tidak ada nama, pakai username sebagai nama default
             nama = username  
 
             hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
@@ -392,7 +385,6 @@ def upload_bukti():
     conn = get_db()
     cursor = conn.cursor()
     try:
-        # simpan nama file (opsional) dan set status jadi Sudah Bayar
         cursor.execute("UPDATE tiket SET bukti_file=%s, status=%s WHERE id_tiket=%s", (filename, "Sudah Bayar", tiket_id))
         conn.commit()
     except Exception as e:
@@ -463,12 +455,51 @@ def tiket_saya():
 
     return render_template("tiket.html", tickets=tickets)
 
-# Kontak
-@app.route('/kontak')
+@app.route("/kontak", methods=["GET", "POST"])
 def kontak():
-    return render_template('kontak.html')
+    if request.method == "POST":
+        nama = request.form["nama"]
+        email = request.form["email"]
+        whatsapp = request.form["whatsapp"]
+        perihal = request.form["perihal"]
+        pesan = request.form["pesan"]
 
-# Logout
+        EMAIL_PENGIRIM = "pesonadestinasibatam@gmail.com"
+        EMAIL_PENERIMA = "pesonadestinasibatam@gmail.com"
+        PASSWORD = "pvkyjevibdkhjzea"
+
+        msg = MIMEMultipart()
+        msg["From"] = EMAIL_PENGIRIM
+        msg["To"] = EMAIL_PENERIMA
+        msg["Subject"] = f"[Kontak Website] {perihal}"
+
+        body = f"""
+        Nama      : {nama}
+        Email     : {email}
+        WhatsApp  : {whatsapp}
+
+        Pesan:
+        {pesan}
+        """
+
+        msg.attach(MIMEText(body, "plain"))
+
+        try:
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server.starttls()
+            server.login(EMAIL_PENGIRIM, PASSWORD)
+            server.send_message(msg)
+            server.quit()
+
+            flash("Pesan berhasil dikirim! Kami akan segera menghubungi kamu.", "success")
+
+        except Exception as e:
+            flash("Gagal mengirim pesan. Silakan coba lagi.", "error")
+
+        return redirect(url_for("kontak"))
+
+    return render_template("kontak.html")
+
 @app.route('/logout')
 def logout():
     session.clear()
@@ -549,10 +580,23 @@ def admin_tiket_page():
         total_items = cursor.fetchone()["total"]
         total_pages = ceil(total_items / per_page)
 
-        cursor.execute(
-            "SELECT * FROM tiket ORDER BY tanggal_pembelian DESC LIMIT %s OFFSET %s",
-            (per_page, offset)
-        )
+        cursor.execute("""
+            SELECT 
+                tiket.id_tiket,
+                pelanggan.nama AS nama_user,
+                tiket.nama_tiket,
+                tiket.tanggal_kunjungan,
+                tiket.jumlah,
+                tiket.harga,
+                tiket.total,
+                tiket.status
+            FROM tiket
+            JOIN pelanggan 
+                ON tiket.user_id = pelanggan.id_pelanggan
+            ORDER BY tiket.tanggal_pembelian DESC
+            LIMIT %s OFFSET %s
+        """, (per_page, offset))
+
         tiket = cursor.fetchall()
     finally:
         cursor.close()
@@ -580,39 +624,6 @@ def admin_delete_tiket(id_tiket):
         conn.close()
     flash("Tiket berhasil dihapus.", "success")
     return redirect(url_for("admin_tiket_page"))
-
-@app.route("/admin/tiket/edit/<int:id_tiket>", methods=["GET", "POST"])
-@login_required_admin
-def admin_edit_tiket(id_tiket):
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-
-    if request.method == "POST":
-        nama_tiket = request.form["nama_tiket"]
-        jumlah = int(request.form["jumlah"])
-        harga = float(request.form["harga"])
-        tanggal_kunjungan = request.form["tanggal_kunjungan"]
-        total = jumlah * harga
-        try:
-            cursor.execute("""
-                UPDATE tiket SET nama_tiket=%s, jumlah=%s, harga=%s, total=%s, tanggal_kunjungan=%s
-                WHERE id_tiket=%s
-            """, (nama_tiket, jumlah, harga, total, tanggal_kunjungan, id_tiket))
-            conn.commit()
-        finally:
-            cursor.close()
-            conn.close()
-        flash("Tiket berhasil diupdate.", "success")
-        return redirect(url_for("admin_tiket_page"))
-
-    try:
-        cursor.execute("SELECT * FROM tiket WHERE id_tiket=%s", (id_tiket,))
-        tiket = cursor.fetchone()
-    finally:
-        cursor.close()
-        conn.close()
-
-    return render_template("edit_tiket.html", tiket=tiket)
 
 @app.route("/admin/konfirmasi/<int:tiket_id>")
 def konfirmasi_tiket(tiket_id):
@@ -673,62 +684,6 @@ def admin_delete_user(id_user):
     flash("User berhasil dihapus.", "success")
     return redirect(url_for("admin_user"))
 
-@app.route("/admin/user/edit/<int:id_user>", methods=["GET","POST"])
-@login_required_admin
-def admin_edit_user(id_user):
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-
-    if request.method == "POST":
-        nama = request.form["nama"]
-        username = request.form["username"]
-        email = request.form["email"]
-        try:
-            cursor.execute("""
-                UPDATE pelanggan SET nama=%s, username=%s, email=%s WHERE id_pelanggan=%s
-            """, (nama, username, email, id_user))
-            conn.commit()
-        finally:
-            cursor.close()
-            conn.close()
-        flash("User berhasil diupdate.", "success")
-        return redirect(url_for("admin_user"))
-
-    try:
-        cursor.execute("SELECT * FROM pelanggan WHERE id_pelanggan=%s", (id_user,))
-        user = cursor.fetchone()
-    finally:
-        cursor.close()
-        conn.close()
-
-    return render_template("edit_user.html", user=user)
-
-@app.route("/admin/settings", methods=["GET","POST"])
-@login_required_admin
-def admin_settings():
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    if request.method == "POST":
-        old_password = request.form["old_password"]
-        new_password = request.form["new_password"]
-        confirm_password = request.form["confirm_password"]
-
-        cursor.execute("SELECT password FROM admin WHERE id_admin=%s", (session['admin_id'],))
-        current_password_hash = cursor.fetchone()['password']
-
-        if not bcrypt.checkpw(old_password.encode('utf-8'), current_password_hash.encode('utf-8')):
-            flash("Password lama salah.", "danger")
-        elif new_password != confirm_password:
-            flash("Password baru tidak cocok.", "danger")
-        else:
-            hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-            cursor.execute("UPDATE admin SET password=%s WHERE id_admin=%s", (hashed, session['admin_id']))
-            conn.commit()
-            flash("Password berhasil diupdate.", "success")
-    cursor.close()
-    conn.close()
-    return render_template("admin.html", section="settings", username=session.get("admin_username"))
-
 @app.route("/admin/destinasi", methods=["GET", "POST"])
 @login_required_admin
 def admin_destinasi():
@@ -781,18 +736,21 @@ def admin_delete_destinasi(id_destinasi):
     flash("Destinasi berhasil dihapus.", "success")
     return redirect(url_for("admin_destinasi"))
 
-# ------------------------------
-# Jalankan aplikasi
-# ------------------------------
 if __name__ == '__main__':
-    print("🚀 Starting Flask application...")
-    print("Testing database connection...")
-    
-    if test_connection():
-        print("Initializing database...")
-        init_database()
-        print("📱 Alternative: http://127.0.0.1:5000")
-        print("⚡ Debug mode: ON")
+    # Cek jika ini adalah child process dari reloader
+    import os
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        # Ini adalah process kedua (reloader), cukup jalankan server
         app.run(host='0.0.0.0', port=5000, debug=True)
     else:
-        print("❌ Cannot start application due to database connection issue")
+        # Ini adalah process pertama, jalankan inisialisasi
+        print("Starting Flask application...")
+        print("Testing database connection...")
+        
+        if test_connection():
+            print("Initializing database...")
+            init_database()
+            print("⚡ Debug mode: ON")
+            app.run(host='0.0.0.0', port=5000, debug=True)
+        else:
+            print("❌ Cannot start application due to database connection issue")
