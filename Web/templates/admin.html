@@ -86,7 +86,7 @@ table.dataTable tbody tr:hover {
     <h2>Admin Dashboard</h2>
     <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
     <a href="{{ url_for('admin_tiket_page') }}">Kelola Tiket</a>
-    <a href="{{ url_for('admin_user') }}">Kelola User</a>
+    <a href="{{ url_for('admin_user') }}">Kelola Pelanggan</a>
     <a href="{{ url_for('admin_destinasi') }}">Kelola Destinasi</a>
     <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
 </div>
@@ -206,6 +206,20 @@ table.dataTable tbody tr:hover {
                     {% endif %}
                 </td>
                 <td>
+                    <a href="#"
+                        onclick="openEditModal(
+                            '{{ d.id_destinasi }}',
+                            '{{ d.nama }}',
+                            '{{ d.lokasi }}',
+                            '{{ d.deskripsi }}',
+                            '{{ d.jam_buka }}',
+                            '{{ d.harga }}',
+                            '{{ d.gambar }}'
+                        )"
+                        style="color: blue;">
+                        Edit
+                    </a>
+
                     <a href="{{ url_for('admin_delete_destinasi', id_destinasi=d.id_destinasi) }}" 
                         style="color:red;" 
                         onclick="return confirm('Hapus destinasi ini?');">
@@ -231,7 +245,49 @@ table.dataTable tbody tr:hover {
 
         <h3>Tambah Destinasi</h3>
 
+    <div id="editDestinasiModal"
+        style="display:none; position:fixed; z-index:999;
+                left:0; top:0; width:100%; height:100%;
+                background:rgba(0,0,0,0.5);">
+
+        <div style="background:#fff; width:600px; margin:80px auto;
+                    padding:20px; border-radius:8px; position:relative;">
+
+            <span onclick="closeEditModal()"
+                style="position:absolute; right:15px; top:10px;
+                        font-size:22px; cursor:pointer;">&times;</span>
+
+            <h3>Edit Destinasi</h3>
+
+            <form method="POST" id="editForm">
+
+                <label>Nama Destinasi</label><br>
+                <input type="text" name="nama" id="edit_nama" required><br><br>
+
+                <label>Lokasi</label><br>
+                <input type="text" name="lokasi" id="edit_lokasi" required><br><br>
+
+                <label>Deskripsi</label><br>
+                <textarea name="deskripsi" id="edit_deskripsi"></textarea><br><br>
+
+                <label>Jam Buka</label><br>
+                <input type="text" name="jam_buka" id="edit_jam_buka" required><br><br>
+
+                <label>Harga</label><br>
+                <input type="number" name="harga" id="edit_harga" required><br><br>
+
+                <label>Link Gambar</label><br>
+                <input type="text" name="gambar" id="edit_gambar"><br><br>
+
+                <button type="submit">Update</button>
+                <button type="button" onclick="closeEditModal()">Batal</button>
+            </form>
+        </div>
+    </div>
+
         <form action="{{ url_for('admin_destinasi') }}" method="POST">
+
+            <input type="hidden" name="id_destinasi" id="id_destinasi">
 
             <label>Nama Destinasi</label><br>
             <input type="text" name="nama" required><br><br>
@@ -280,6 +336,24 @@ $(document).ready(function () {
         }
     });
 });
+
+function openEditModal(id, nama, lokasi, deskripsi, jam, harga, gambar) {
+    document.getElementById("edit_nama").value = nama;
+    document.getElementById("edit_lokasi").value = lokasi;
+    document.getElementById("edit_deskripsi").value = deskripsi;
+    document.getElementById("edit_jam_buka").value = jam;
+    document.getElementById("edit_harga").value = harga;
+    document.getElementById("edit_gambar").value = gambar;
+
+    document.getElementById("editForm").action =
+        "/admin/destinasi/edit/" + id;
+
+    document.getElementById("editDestinasiModal").style.display = "block";
+}
+
+function closeEditModal() {
+    document.getElementById("editDestinasiModal").style.display = "none";
+}
 </script>
 
 </body>

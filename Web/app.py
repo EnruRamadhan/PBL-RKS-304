@@ -722,6 +722,41 @@ def admin_destinasi():
         username=session.get("admin_username")
     )
 
+@app.route("/admin/destinasi/edit/<int:id_destinasi>", methods=["POST"])
+@login_required_admin
+def admin_edit_destinasi(id_destinasi):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE destinasi SET
+                nama=%s,
+                lokasi=%s,
+                deskripsi=%s,
+                jam_buka=%s,
+                harga=%s,
+                gambar=%s
+            WHERE id_destinasi=%s
+        """, (
+            request.form['nama'],
+            request.form['lokasi'],
+            request.form['deskripsi'],
+            request.form['jam_buka'],
+            request.form['harga'],
+            request.form['gambar'],
+            id_destinasi
+        ))
+
+        conn.commit()
+        flash("Destinasi berhasil diupdate", "success")
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("admin_destinasi"))
+
 @app.route("/admin/destinasi/delete/<int:id_destinasi>")
 @login_required_admin
 def admin_delete_destinasi(id_destinasi):
@@ -737,13 +772,10 @@ def admin_delete_destinasi(id_destinasi):
     return redirect(url_for("admin_destinasi"))
 
 if __name__ == '__main__':
-    # Cek jika ini adalah child process dari reloader
     import os
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-        # Ini adalah process kedua (reloader), cukup jalankan server
         app.run(host='0.0.0.0', port=5000, debug=True)
     else:
-        # Ini adalah process pertama, jalankan inisialisasi
         print("Starting Flask application...")
         print("Testing database connection...")
         
