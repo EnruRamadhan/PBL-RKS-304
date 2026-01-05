@@ -88,9 +88,10 @@
 
             <div class="mt-4 bg-white/70 backdrop-blur-md p-4 rounded-lg shadow-inner">
                 <h2 class="text-lg font-semibold text-gray-700 mb-2">📤 Upload Bukti Pembayaran</h2>
-                <input type="file" id="buktiPembayaran" accept="image/*"
-                       class="block w-full text-sm text-gray-600 border p-2 rounded-lg cursor-pointer mb-2" />
-                <div id="previewBukti" class="text-center"></div>
+                <input type="file" id="buktiPembayaran" disabled />
+                <button onclick="uploadBukti()" disabled id="btnUpload">
+                    Upload Bukti Pembayaran
+                </button>
             </div>
 
             <button onclick="downloadBukti()"

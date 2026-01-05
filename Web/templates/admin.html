@@ -129,8 +129,25 @@ table.dataTable tbody tr:hover {
                     <td>{{ t.jumlah }}</td>
                     <td>{{ t.harga }}</td>
                     <td>{{ t.total }}</td>
-                    <td>{{ t.status }}</td>
+                    <td>{% if t.bukti_file %}
+                        <a href="#" onclick="lihatBukti('{{ t.bukti_file }}')"
+                            style="color:blue; text-decoration:underline;">
+                            {{ t.status }}
+                        </a>
+                    {% else %}
+                        {{ t.status }}
+                    {% endif %}
+                    </td>
+
                     <td>
+                        {% if t.status == 'Menunggu Konfirmasi' and t.bukti_file %}
+                            <a href="{{ url_for('konfirmasi_tiket', tiket_id=t.id_tiket) }}"
+                                onclick="return confirm('Konfirmasi pembayaran ini?')"
+                                style="color:green; margin-right:10px;">
+                                Konfirmasi
+                            </a>
+                        {% endif %}
+
                         <a href="{{ url_for('admin_delete_tiket', id_tiket=t.id_tiket) }}" style="color:red;">Hapus</a>
                     </td>
                 </tr>
@@ -230,6 +247,18 @@ table.dataTable tbody tr:hover {
             {% endfor %}
         </tbody>
     </table>
+
+<div id="modalBukti"
+     style="display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,0.6); z-index:999;">
+  <div style="background:white; padding:20px; margin:10% auto; width:500px;">
+    <img id="imgBukti" style="max-width:100%;">
+    <br>
+    <button onclick="document.getElementById('modalBukti').style.display='none'">
+      Tutup
+    </button>
+  </div>
+</div>
 
 <div id="destinasiModal"
      style="display:none; position:fixed; z-index:999;
@@ -354,12 +383,17 @@ function openEditModal(id, nama, lokasi, deskripsi, jam, harga, gambar) {
 function closeEditModal() {
     document.getElementById("editDestinasiModal").style.display = "none";
 }
-</script>
 
-</body>
-</html>
+function lihatBukti(filename) {
+    document.getElementById("imgBukti").src =
+        "/static/uploads/" + filename;
+    document.getElementById("modalBukti").style.display = "block";
+}
 
-<script>
+function closeBukti() {
+    document.getElementById("modalBukti").style.display = "none";
+}
+
 $(document).ready(function () {
     if ($('#tiketTable').length) {
         $('#tiketTable').DataTable({
@@ -409,4 +443,7 @@ $(document).ready(function () {
 
 });
 </script>
+</body>
+</html>
+
 
