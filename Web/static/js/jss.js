@@ -19,68 +19,90 @@ function updateTotalHarga() {
 async function checkout() {
   const destinasiSelect = document.getElementById("destinasiSelect");
   const destinasi = destinasiSelect.value;
-  const harga = parseInt(destinasiSelect.options[destinasiSelect.selectedIndex].dataset.harga) || 0;
+  const harga = parseInt(destinasiSelect.options[destinasiSelect.selectedIndex].dataset.harga);
   const tanggal = document.getElementById("tanggal").value;
-  const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
+  const jumlah = parseInt(document.getElementById("jumlah").value);
   const namaPemesan = document.getElementById("namaPemesan").value.trim();
 
   if (!namaPemesan || !destinasi || !tanggal || jumlah < 1) {
-    alert("⚠️ Lengkapi semua data pemesanan!");
+    alert("Lengkapi semua data!");
     return;
   }
 
-  try {
-    const res = await fetch("/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nama_tiket: destinasi,
-        jumlah: jumlah,
-        harga: harga,
-        tanggal: tanggal
-      })
-    });
+  const res = await fetch("/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      nama_tiket: destinasi,
+      jumlah,
+      harga,
+      tanggal
+    })
+  });
 
-    const data = await res.json();
-    window.currentTiketID = data.tiket_id;
+  const data = await res.json();
 
-    if (!res.ok) {
-      alert("❌ Checkout gagal: " + (data.error || data.message));
-      return;
-    }
-
-    alert("✅ Checkout berhasil!");
-    sudahCheckout = true;
-    currentTiketID = data.tiket_id;
-    console.log("Tiket ID:", currentTiketID);
-  } catch (err) {
-    alert("❌ Error server.");
+  if (!res.ok) {
+    alert(data.error);
+    return;
   }
+
+  currentTiketID = data.tiket_id;
+  sudahCheckout = true;
+
+  document.getElementById("buktiPembayaran").disabled = false;
+  document.getElementById("btnUpload").disabled = false;
+
+  alert("Checkout berhasil! Silakan upload bukti pembayaran.");
 }
 
-document.getElementById("buktiPembayaran").addEventListener("change", async (e) => {
-    if (!currentTiketID) {
-        alert("Tiket ID tidak ditemukan! Checkout dulu.");
-        return;
-    }
+async function uploadBukti() {
+  if (!currentTiketID) {
+    alert("Tiket ID tidak ditemukan! Checkout dulu.");
+    return;
+  }
 
-    const file = e.target.files[0];
-    const fd = new FormData();
-    fd.append("bukti", file);
-    fd.append("tiket_id", currentTiketID);
+  const fileInput = document.getElementById("buktiPembayaran");
+  const file = fileInput.files[0];
 
-    let res = await fetch("/upload_bukti", {
-        method: "POST",
-        body: fd
-    });
+  if (!file) {
+    alert("Pilih file bukti pembayaran!");
+    return;
+  }
 
-    let data = await res.json();
+  const fd = new FormData();
+  fd.append("bukti", file);
+  fd.append("tiket_id", currentTiketID);
 
-    if (data.status === "success") {
-        alert("📁 Bukti pembayaran berhasil diupload! Status berubah menjadi Sudah Bayar.");
-        sudahUpload = true;
-    }
-});
+  const res = await fetch("/upload_bukti", {
+    method: "POST",
+    body: fd
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    alert("📁 Bukti berhasil diupload! Menunggu konfirmasi admin.");
+
+    currentTiketID = null;
+    sudahUpload = false;
+    sudahCheckout = false;
+
+    fileInput.value = "";
+    document.getElementById("namaPemesan").value = "";
+    document.getElementById("destinasiSelect").value = "";
+    document.getElementById("tanggal").value = "";
+    document.getElementById("jumlah").value = "";
+    document.getElementById("previewHarga").innerText = "";
+
+    setTimeout(() => {
+      location.reload();
+    }, 500);
+
+  } else {
+    alert("❌ Upload gagal: " + data.error);
+  }
+}
 
 function downloadBukti() {
   if (!sudahCheckout) {

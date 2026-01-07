@@ -297,6 +297,9 @@ def checkout():
     tanggal_kunjungan = data.get("tanggal")
     user_id = session["pelanggan_id"]
 
+    if not nama_tiket or jumlah < 1 or not tanggal_kunjungan:
+        return jsonify({"error": "Data checkout tidak lengkap"}), 400
+
     tz = pytz.timezone("Asia/Jakarta")
     tanggal_pembelian = datetime.now(tz)
 
@@ -339,7 +342,7 @@ def checkout():
         cursor.execute("""
             INSERT INTO tiket (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga, status)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga, "Belum Bayar"))
+        """, (user_id, nama_tiket, tanggal_kunjungan, tanggal_pembelian, jumlah, harga, "Menunggu Konfirmasi"))
 
         conn.commit()
 
@@ -370,31 +373,40 @@ def upload_bukti():
     tiket_id = request.form.get("tiket_id")
     file = request.files.get("bukti")
 
-    if not tiket_id:
-        return jsonify({"error": "tiket_id missing"}), 400
-
-    if not file:
-        return jsonify({"error": "No file uploaded"}), 400
+    if not tiket_id or not file:
+        return jsonify({"error": "Data tidak lengkap"}), 400
 
     upload_dir = os.path.join(app.static_folder, "uploads")
     os.makedirs(upload_dir, exist_ok=True)
+
     filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{secure_filename(file.filename)}"
-    save_path = os.path.join(upload_dir, filename)
-    file.save(save_path)
+    file.save(os.path.join(upload_dir, filename))
 
     conn = get_db()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
+
     try:
-        cursor.execute("UPDATE tiket SET bukti_file=%s, status=%s WHERE id_tiket=%s", (filename, "Sudah Bayar", tiket_id))
+        cursor.execute("SELECT id_tiket FROM tiket WHERE id_tiket=%s", (tiket_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "Tiket tidak ditemukan"}), 404
+
+        cursor.execute("""
+            UPDATE tiket
+            SET bukti_file=%s, status=%s
+            WHERE id_tiket=%s
+        """, (filename, "Menunggu Konfirmasi", tiket_id))
+
         conn.commit()
+
+        return jsonify({"status": "success"})
+
     except Exception as e:
-        print("❌ Error saat upload_bukti:", e)
+        print("❌ ERROR upload bukti:", e)
         return jsonify({"error": str(e)}), 500
+
     finally:
         cursor.close()
         conn.close()
-
-    return jsonify({"status":"success", "filename": filename})
 
 @app.route("/download_bukti/<int:id_tiket>")
 def download_bukti(id_tiket):
@@ -402,7 +414,7 @@ def download_bukti(id_tiket):
         return jsonify({"error": "Not logged in"}), 401
 
     conn = get_db()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()(dictionary=True)
 
     cursor.execute("SELECT bukti_file FROM tiket WHERE id_tiket = %s", (id_tiket,))
     data = cursor.fetchone()
@@ -589,7 +601,8 @@ def admin_tiket_page():
                 tiket.jumlah,
                 tiket.harga,
                 tiket.total,
-                tiket.status
+                tiket.status,
+                tiket.bukti_file
             FROM tiket
             JOIN pelanggan 
                 ON tiket.user_id = pelanggan.id_pelanggan
