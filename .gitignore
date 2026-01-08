@@ -5,4 +5,4 @@ docker-compose.yml
 test_db.py
 test_registration.py
 wisata_db/
-Web\static\uploads
+Web/static/uploads/
