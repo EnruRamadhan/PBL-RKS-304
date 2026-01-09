@@ -82,23 +82,8 @@ async function uploadBukti() {
   const data = await res.json();
 
   if (res.ok) {
-    alert("📁 Bukti berhasil diupload! Menunggu konfirmasi admin.");
-
-    currentTiketID = null;
-    sudahUpload = false;
-    sudahCheckout = false;
-
-    fileInput.value = "";
-    document.getElementById("namaPemesan").value = "";
-    document.getElementById("destinasiSelect").value = "";
-    document.getElementById("tanggal").value = "";
-    document.getElementById("jumlah").value = "";
-    document.getElementById("previewHarga").innerText = "";
-
-    setTimeout(() => {
-      location.reload();
-    }, 500);
-
+    sudahUpload = true;
+    alert("✅ Bukti berhasil diupload! Sekarang Anda bisa download bukti pemesanan.");
   } else {
     alert("❌ Upload gagal: " + data.error);
   }
@@ -209,7 +194,31 @@ function downloadBukti() {
 
   const namaFile = `Bukti_Pemesanan_${destinasi.replace(/\s+/g, "_")}.pdf`;
   doc.save(namaFile);
-  alert("✅ Bukti pemesanan berhasil diunduh!");
+  
+  // ⭐ AUTO RESET SETELAH DOWNLOAD SELESAI ⭐
+  autoResetForm();
+  
+  alert("✅ Bukti pemesanan berhasil diunduh! Form telah direset untuk pemesanan baru.");
+}
+
+// ⭐ FUNGSI AUTO RESET SETELAH DOWNLOAD ⭐
+function autoResetForm() {
+  // Reset semua variabel
+  currentTiketID = null;
+  sudahUpload = false;
+  sudahCheckout = false;
+
+  // Kosongkan semua input form
+  document.getElementById("buktiPembayaran").value = "";
+  document.getElementById("namaPemesan").value = "";
+  document.getElementById("destinasiSelect").value = "";
+  document.getElementById("tanggal").value = "";
+  document.getElementById("jumlah").value = "";
+  document.getElementById("previewHarga").innerText = "";
+  
+  // Nonaktifkan tombol upload
+  document.getElementById("buktiPembayaran").disabled = true;
+  document.getElementById("btnUpload").disabled = true;
 }
 
 document.getElementById("searchInput").addEventListener("input", function () {
