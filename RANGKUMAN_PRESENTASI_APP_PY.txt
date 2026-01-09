@@ -1,0 +1,879 @@
+# RANGKUMAN MATERIAL PRESENTASI - ANALISIS KODE APP.PY
+# Untuk: Presentasi Sistem Informasi Pesona Destinasi Batam
+# Tanggal: 9 Januari 2026
+# ============================================================
+
+📊 RANGKUMAN MATERIAL PRESENTASI - ANALISIS KODE APP.PY
+
+## I. PENDAHULUAN & KONFIGURASI AWAL
+
+### A. Import Libraries & Dependencies
+Lines 1-17: Import semua modul yang diperlukan
+
+Fungsi & Kegunaan:
+- Flask - Framework web Python untuk membuat aplikasi web
+- mysql.connector - Library untuk koneksi ke database MySQL
+- bcrypt - Library untuk enkripsi password (hashing)
+- functools.wraps - Decorator untuk membuat custom decorator
+- dotenv - Untuk membaca file konfigurasi .env
+- datetime & pytz - Untuk menangani tanggal/waktu dan timezone
+- werkzeug - Utility untuk handle file uploads
+- smtplib & email.mime - Untuk mengirim email
+
+Istilah Teknis:
+- Import/Dependencies: Modul eksternal yang digunakan
+- Library: Kumpulan fungsi siap pakai
+
+---
+
+### B. Konfigurasi Environment & Database (Lines 19-35)
+
+Line 19-20: basedir & env_path
+- Fungsi: Menentukan path folder project dan lokasi file konfigurasi
+- Kegunaan: Memastikan file .env ditemukan dari directory yang benar
+- Istilah: Path Resolution - penentuan jalur absolut file
+
+Line 21: load_dotenv(env_path)
+- Fungsi: Membaca variabel environment dari file connectionDB.env
+- Kegunaan: Menyimpan kredensial database secara aman (tidak hardcoded)
+- Istilah: Environment Variables - variabel sistem untuk konfigurasi sensitif
+
+Line 23-24: Inisialisasi Flask App
+- static_folder='static' - Folder untuk file CSS, JS, gambar
+- template_folder='templates' - Folder untuk file HTML template
+- secret_key - Kunci rahasia untuk enkripsi session
+- PERMANENT_SESSION_LIFETIME - Durasi session 3600000 detik
+
+Line 27-32: Database Configuration Dictionary
+- Fungsi: Menyimpan semua parameter koneksi database
+- Parameter: host, user, password, database, port, auth_plugin
+- Kegunaan: Menghubungkan aplikasi ke MySQL server
+
+---
+
+## II. FUNGSI UTILITY & DATABASE CONNECTION
+
+### A. Fungsi get_db() (Lines 34-39)
+
+Fungsi & Kegunaan:
+- Membuat koneksi baru ke database MySQL setiap kali dipanggil
+- Menangani error koneksi dengan try-except
+
+Istilah Teknis:
+- Connection Pool: Teknik mengelola koneksi database
+- Exception Handling: Penanganan error
+
+Implementasi OOP:
+- Abstraksi: Menyembunyikan detail koneksi database di balik satu fungsi
+
+---
+
+### B. Fungsi test_connection() (Lines 41-52)
+
+Fungsi & Kegunaan:
+- Menguji apakah koneksi database berhasil
+- Menampilkan daftar tabel di database
+- Dijalankan saat aplikasi startup
+
+Proses:
+1. Coba koneksi ke database
+2. Jalankan query "SHOW TABLES" untuk list tabel
+3. Tampilkan hasil atau error message
+
+Istilah Teknis:
+- Testing/Debugging: Proses verifikasi koneksi
+- SQL Query: Perintah database "SHOW TABLES"
+
+---
+
+### C. Fungsi init_database() (Lines 54-71)
+
+Fungsi & Kegunaan:
+- Membuat tabel `pelanggan` jika belum ada
+- Menjalankan CREATE TABLE IF NOT EXISTS
+
+Struktur Tabel Pelanggan:
+| Field | Type | Keterangan |
+|-------|------|-----------|
+| id_pelanggan | INT AUTO_INCREMENT PRIMARY KEY | ID unik, auto increment |
+| nama | VARCHAR(100) | Nama pelanggan |
+| username | VARCHAR(100) UNIQUE | Username unik |
+| email | VARCHAR(100) UNIQUE | Email unik |
+| password | VARCHAR(255) | Password ter-hash |
+| tanggal_daftar | DATETIME DEFAULT CURRENT_TIMESTAMP | Waktu registrasi otomatis |
+| last_login | DATETIME NULL | Waktu login terakhir |
+
+Istilah Teknis:
+- DDL (Data Definition Language): CREATE TABLE
+- Primary Key: Identifikasi unik record
+- UNIQUE Constraint: Memastikan nilai unik
+
+Implementasi OOP:
+- Enkapsulasi: Semua logik pembuatan tabel tersimpan dalam satu fungsi
+
+---
+
+## III. DECORATOR & SISTEM AUTENTIKASI
+
+### A. Fungsi login_required_pelanggan() (Lines 73-79)
+
+Fungsi & Kegunaan:
+- Custom decorator untuk melindungi route yang memerlukan login
+- Mengecek apakah `pelanggan_username` ada di session
+
+Cara Kerja:
+1. Jika user belum login → redirect ke halaman login
+2. Jika sudah login → lanjutkan ke halaman yang diminta
+
+Istilah Teknis:
+- Decorator: Function wrapper yang menambah fungsi lain
+- @wraps: Decorator dari functools untuk preserve metadata
+- Session: Data user yang tersimpan di server
+
+Implementasi OOP:
+- Polimorfisme: Decorator dapat digunakan di berbagai route
+- Abstraksi: Logik autentikasi disembunyikan di decorator
+
+---
+
+## IV. ROUTE LANDING & HOME PAGE
+
+### A. Route Landing @app.route('/') & @app.route('/landing') (Lines 81-85)
+
+Fungsi & Kegunaan:
+- Halaman pertama yang dilihat user
+- `session.clear()` - Menghapus semua data session (logout otomatis)
+
+Istilah Teknis:
+- Route: Endpoint URL aplikasi
+- Template Rendering: Menampilkan file HTML ke browser
+
+---
+
+### B. Route Home @app.route("/home") (Lines 87-131)
+
+Fungsi & Kegunaan:
+- Halaman utama yang menampilkan destinasi wisata
+- Menggabungkan destinasi statis (hardcoded) + destinasi dinamis dari database
+
+Proses Logika:
+
+1. Destinasi Statis (Lines 89-102)
+   - List destinasi hardcoded dengan data: nama, deskripsi, jam_buka, harga, gambar
+   - 10 destinasi wisata Batam (Pantai Nongsa, Pantai Melayu, dll)
+
+2. Format Destinasi Statis (Lines 104-111)
+   - Ubah list destinasi dengan menambah `id_destinasi` = f"s{i}"
+   - Prefix "s" = destinasi statis
+
+3. Fetch Destinasi dari Database (Lines 113-126)
+   - Query ke tabel `destinasi` ORDER BY id_destinasi DESC
+   - Jika ada error, tangkap exception dan print error message
+   - Finally block: Tutup cursor dan koneksi
+
+4. Gabung & Render (Lines 128-131)
+   - Combine `destinasi_statis + destinasi_admin`
+   - Render ke template `index.html` dengan data destinasi
+
+Istilah Teknis:
+- List Concatenation: Menggabung 2 list Python
+- Dictionary: Struktur data key-value
+- Context Variables: Data yang dikirim ke template
+
+Implementasi OOP:
+- Abstraksi: Detail fetch data database disembunyikan
+- Encapsulation: Data destinasi dikelola dalam fungsi tersebut
+
+---
+
+## V. ROUTE INDEX PAGE (Login Required)
+
+### Route @app.route("/index") (Lines 133-147)
+
+Decorator: @login_required_pelanggan - Hanya user login yang bisa akses
+
+Fungsi & Kegunaan:
+- Halaman index untuk user yang sudah login
+- Fetch destinasi dari database dengan ordering tertentu
+
+Proses:
+1. Cek login requirement via decorator
+2. Get koneksi database
+3. Query: SELECT * FROM destinasi ORDER BY is_statis DESC, id_destinasi ASC
+4. Return render template dengan data destinasi
+
+Istilah Teknis:
+- ORDER BY: Pengurutan hasil query
+- DESC/ASC: Descending/Ascending order
+
+---
+
+## VI. SISTEM LOGIN & AUTENTIKASI
+
+### Route Login @app.route('/login') (Lines 149-213)
+
+Fungsi & Kegunaan:
+- Handle login untuk Admin & Pelanggan (dual authentication)
+- Validasi username & password
+
+Proses Login Pelanggan:
+
+1. Cek Koneksi Database (Lines 156-157)
+   - Jika tidak terhubung → kembalikan error message
+
+2. Query Admin Terlebih Dahulu (Lines 159-173)
+   - SELECT * FROM admin WHERE username=%s
+   - Cek password dengan bcrypt.checkpw()
+   - Jika benar: set session admin_id, admin_username, admin_role
+   - Redirect ke admin_dashboard
+
+3. Query Pelanggan (Lines 175-183)
+   - Jika admin tidak ditemukan, cek di tabel pelanggan
+   - Query: SELECT id_pelanggan, username, password FROM pelanggan
+   - Validasi password dengan bcrypt
+   - Jika benar: set session pelanggan_id, pelanggan_username
+
+4. Error Handling (Lines 184-193)
+   - Username tidak ditemukan
+   - Password salah
+   - Database error
+
+Istilah Teknis:
+- bcrypt.checkpw(): Verifikasi password yang ter-hash
+- parameterized query (%s): Mencegah SQL injection
+- session: Server-side storage untuk data user
+
+Implementasi OOP:
+- Polimorfisme: Login endpoint menangani 2 tipe user (admin & pelanggan)
+- Abstraksi: Logik verifikasi password disembunyikan di library bcrypt
+- Encapsulation: Password tidak pernah disimpan plain text
+
+---
+
+## VII. SISTEM REGISTRASI
+
+### Route Register @app.route('/register') (Lines 215-267)
+
+Fungsi & Kegunaan:
+- Memungkinkan pelanggan baru mendaftar
+- Validasi input & hashing password
+
+Validasi Input (Lines 226-229):
+1. Semua field wajib diisi (username, email, password, confirm_password)
+2. Password & confirm_password harus cocok
+3. Password minimal 6 karakter
+
+Proses Registrasi (Lines 231-250):
+1. Hash password menggunakan bcrypt.gensalt()
+2. Insert data ke tabel pelanggan
+3. Handle error jika username/email sudah terdaftar (errno 1062 = Duplicate Entry)
+
+SQL Query:
+INSERT INTO pelanggan (nama, username, email, password)
+VALUES (%s, %s, %s, %s)
+
+Istilah Teknis:
+- bcrypt.hashpw(): Hashing password dengan salt
+- UNIQUE constraint: Mencegah duplikasi username/email
+- Error Code 1062: MySQL error untuk duplicate entry
+
+Implementasi OOP:
+- Encapsulation: Logik hashing & validasi tersimpan dalam fungsi
+- Single Responsibility: Fungsi hanya handle registrasi pelanggan
+
+---
+
+## VIII. ROUTE PELANGGAN & CHECKOUT
+
+### Route Pelanggan @app.route("/pelanggan") (Lines 269-281)
+
+Fungsi & Kegunaan:
+- Menampilkan daftar destinasi untuk pelanggan
+- Fetch dari database dengan order nama ASC
+
+---
+
+### Route Checkout @app.route("/checkout") (Lines 283-365)
+
+Fungsi & Kegunaan:
+- Handle pembelian tiket dari frontend (AJAX/JSON)
+- Validasi data & insert ke database
+
+Proses Checkout (Lines 284-365):
+
+1. Cek Login (Lines 285-286)
+   - Jika tidak login → return 401 error
+
+2. Extract Data (Lines 288-292)
+   - nama_tiket, jumlah, tanggal_kunjungan dari JSON request
+   - user_id dari session
+
+3. Validasi Data (Lines 294-296)
+   - Jika ada field kosong atau jumlah < 1 → error 400
+
+4. Set Timezone & Tanggal Pembelian (Lines 298-300)
+   - tz = pytz.timezone("Asia/Jakarta")
+   - tanggal_pembelian = datetime.now(tz)
+
+5. Parse & Validasi Tanggal Kunjungan (Lines 302-306)
+   - Format: YYYY-MM-DD
+   - Jika format salah → error
+   - Jika tanggal sudah lewat → error
+
+6. Cari Harga Destinasi (Lines 310-331)
+   - Query database terlebih dahulu
+   - Jika tidak ada di DB, cari di dictionary statis
+   - Jika tidak ada di keduanya → error 400
+
+7. Hitung Total & Insert (Lines 333-344)
+   - total = harga × jumlah
+   - INSERT ke tabel tiket dengan status "Menunggu Konfirmasi"
+   - Get tiket_id dari lastrowid
+
+8. Return Response (Lines 346-352)
+   - Return JSON dengan status success & detail tiket
+
+Istilah Teknis:
+- JSON/AJAX: Komunikasi asynchronous client-server
+- Timezone: Zona waktu geografis
+- lastrowid: ID baris terakhir yang di-insert
+
+Implementasi OOP:
+- Abstraksi: Logik harga diambil dari fungsi/dictionary
+- Error Handling: Berbagai validasi untuk mencegah data invalid
+
+---
+
+## IX. UPLOAD BUKTI PEMBAYARAN & DOWNLOAD
+
+### Route Upload Bukti @app.route("/upload_bukti") (Lines 367-408)
+
+Fungsi & Kegunaan:
+- Upload file bukti pembayaran untuk tiket
+- Simpan file ke folder static/uploads
+
+Proses (Lines 369-406):
+
+1. Cek Login - Jika tidak login → 401 error
+
+2. Get Data dari Request (Lines 375-376)
+   - tiket_id dari form
+   - bukti (file) dari request.files
+
+3. Setup Upload Directory (Lines 378-380)
+   - Path: app.static_folder/uploads
+   - Buat folder jika belum ada dengan os.makedirs()
+
+4. Generate Filename (Lines 382-383)
+   - Format: YYYYMMDDHHMMSS_originalfilename
+   - secure_filename(): Sanitasi nama file dari karakter berbahaya
+   - Save ke folder uploads
+
+5. Update Database (Lines 388-395)
+   - Cek apakah tiket_id ada di database
+   - UPDATE tiket SET bukti_file, status = "Menunggu Konfirmasi"
+
+Istilah Teknis:
+- File Upload: Unggah file dari client ke server
+- secure_filename(): Fungsi werkzeug untuk sanitasi nama file
+- Timestamp: Format tanggal-waktu untuk unique filename
+
+---
+
+### Route Download Bukti @app.route("/download_bukti/<int:id_tiket>") (Lines 410-438)
+
+Fungsi & Kegunaan:
+- Download file bukti pembayaran yang sudah diupload
+- Return file ke browser sebagai attachment
+
+Proses:
+1. Cek login
+2. Query database untuk get bukti_file dari tiket
+3. Cek apakah file ada di server
+4. Return file dengan `send_file()`
+
+Istilah Teknis:
+- Route Parameter: <int:id_tiket> - parameter dinamis di URL
+- send_file(): Flask function untuk mengirim file ke client
+- as_attachment=True: Download file, bukan display di browser
+
+---
+
+## X. ROUTE TIKET SAYA
+
+### Route Tiket @app.route("/tiket") (Lines 440-469)
+
+Fungsi & Kegunaan:
+- Tampilkan semua tiket yang dimiliki user yang login
+- Fetch dari database dengan filter user_id
+
+Proses:
+1. Cek apakah user login (user atau admin)
+2. Get user_id dari session
+3. Query tiket dengan JOIN informasi user jika perlu
+4. ORDER BY tanggal_pembelian DESC (terbaru pertama)
+
+SQL Query:
+SELECT id_tiket, nama_tiket, tanggal_kunjungan, tanggal_pembelian, 
+       jumlah, harga, total, status, bukti_file
+FROM tiket
+WHERE user_id = %s
+ORDER BY tanggal_pembelian DESC
+
+Istilah Teknis:
+- Row-level security: Hanya user sendiri bisa lihat tiketnya
+
+---
+
+## XI. SISTEM KONTAK & EMAIL
+
+### Route Kontak @app.route("/kontak") (Lines 471-523)
+
+Fungsi & Kegunaan:
+- Form kontak untuk pelanggan menghubungi admin
+- Mengirim email ke admin via SMTP Gmail
+
+Proses Form Submission (Lines 472-516):
+
+1. Extract Form Data (Lines 475-479)
+   - nama, email, whatsapp, perihal, pesan
+
+2. Setup Email (Lines 481-483)
+   - EMAIL_PENGIRIM = "pesonadestinasibatam@gmail.com"
+   - EMAIL_PENERIMA = admin email
+   - PASSWORD = App Password Gmail (bukan password akun)
+
+3. Buat Email Message (Lines 485-497)
+   - msg = MIMEMultipart() - email dengan multiple parts
+   - Set header: From, To, Subject
+   - Buat body dengan format text
+   - Attach body ke message
+
+4. Kirim Email via SMTP (Lines 499-508)
+   - Connect ke smtp.gmail.com port 587
+   - starttls() - enkripsi koneksi
+   - Login dengan email & password
+   - Send message
+
+5. Flash Message & Redirect (Lines 509-516)
+   - Jika berhasil → flash success message
+   - Jika error → flash error message
+   - Redirect ke halaman kontak
+
+Istilah Teknis:
+- SMTP (Simple Mail Transfer Protocol): Protokol untuk kirim email
+- MIMEMultipart: Email dengan multiple parts (text, attachment, dll)
+- TLS: Enkripsi koneksi email
+- App Password: Password khusus untuk app (lebih aman dari password akun)
+
+Implementasi OOP:
+- Encapsulation: Logic email sending tersimpan dalam function
+- Error Handling: Try-except untuk handle email sending error
+
+---
+
+## XII. ROUTE LOGOUT
+
+### Route Logout @app.route('/logout') (Lines 525-528)
+
+Fungsi & Kegunaan:
+- Menghapus session user & logout
+- Redirect ke halaman landing
+
+Proses:
+1. session.clear() - Hapus semua data session
+2. Redirect ke landing page
+
+---
+
+## XIII. ADMIN DECORATOR & LOGIN ADMIN
+
+### Fungsi login_required_admin() (Lines 530-536)
+
+Fungsi & Kegunaan:
+- Decorator khusus untuk route admin
+- Cek apakah user adalah admin (logged_in_admin = True)
+
+---
+
+### Route Admin Login @app.route('/admin_login') (Lines 538-540)
+
+Fungsi & Kegunaan:
+- Tampilkan form login admin
+
+---
+
+### Route Admin Login POST @app.route("/admin_login") - POST Method (Lines 542-564)
+
+Proses:
+1. Get username & password dari form
+2. Query admin dari database
+3. Verify password dengan bcrypt
+4. Jika benar: set session admin
+5. Redirect ke admin dashboard
+
+---
+
+## XIV. ADMIN DASHBOARD
+
+### Route Admin Dashboard @app.route("/admin") (Lines 566-588)
+
+Decorator: @login_required_admin - Hanya admin yang bisa akses
+
+Fungsi & Kegunaan:
+- Halaman dashboard admin dengan overview statistics
+- Tampilkan: total tiket, total user, total pendapatan
+
+Proses (Lines 568-585):
+
+1. Total Tiket (Line 571)
+   SELECT COUNT(*) AS total FROM tiket
+
+2. Total Users (Lines 573-574)
+   SELECT COUNT(*) AS total FROM pelanggan
+
+3. Total Pendapatan (Lines 576-577)
+   SELECT SUM(total) AS total_pendapatan FROM tiket
+   - SUM(): Aggregate function untuk menjumlahkan
+   - Handle NULL dengan `or 0`
+
+Istilah Teknis:
+- COUNT(*): Fungsi untuk menghitung jumlah baris
+- SUM(): Fungsi untuk menjumlahkan nilai
+- Aggregate Functions: Fungsi yang mengolah multiple rows
+
+Implementasi OOP:
+- Single Responsibility: Dashboard hanya menampilkan summary
+- Abstraction: Logic perhitungan dilakukan di database level
+
+---
+
+## XV. ADMIN TIKET MANAGEMENT
+
+### Route Admin Tiket @app.route("/admin/tiket") (Lines 590-629)
+
+Decorator: @login_required_admin
+
+Fungsi & Kegunaan:
+- Tampilkan semua tiket dengan pagination
+- Admin bisa lihat detail tiket dari semua user
+
+Fitur Pagination (Lines 592-594):
+- page = parameter dari URL (default = 1)
+- per_page = 20 tiket per halaman
+- offset = (page-1) * per_page
+
+Proses (Lines 597-627):
+
+1. Hitung Total Pages (Lines 599-601)
+   SELECT COUNT(*) AS total FROM tiket
+   total_pages = ceil(total_items / per_page)
+
+2. Fetch Tiket dengan JOIN (Lines 603-616)
+   SELECT tiket.*, pelanggan.nama AS nama_user
+   FROM tiket
+   JOIN pelanggan ON tiket.user_id = pelanggan.id_pelanggan
+   ORDER BY tiket.tanggal_pembelian DESC
+   LIMIT %s OFFSET %s
+
+Istilah Teknis:
+- Pagination: Teknik membagi data ke multiple pages
+- LIMIT & OFFSET: SQL untuk membatasi hasil query
+- JOIN: Menggabung data dari 2+ tabel
+- ceil(): Python function untuk round up
+
+Implementasi OOP:
+- Composition: JOIN untuk menggabungkan data tiket & pelanggan
+
+---
+
+### Route Delete Tiket @app.route("/admin/tiket/delete/<int:id_tiket>") (Lines 631-640)
+
+Fungsi & Kegunaan:
+- Admin menghapus tiket dari database
+
+SQL:
+DELETE FROM tiket WHERE id_tiket=%s
+
+---
+
+### Route Konfirmasi Tiket @app.route("/admin/konfirmasi/<int:tiket_id>") (Lines 642-650)
+
+Fungsi & Kegunaan:
+- Admin mengkonfirmasi pembayaran tiket
+- Ubah status dari "Menunggu Konfirmasi" menjadi "Sudah Bayar"
+
+SQL:
+UPDATE tiket SET status = 'Sudah Bayar' WHERE id_tiket = %s
+
+---
+
+## XVI. ADMIN USER MANAGEMENT
+
+### Route Admin User @app.route("/admin/user") (Lines 652-684)
+
+Decorator: @login_required_admin
+
+Fungsi & Kegunaan:
+- Tampilkan semua user pelanggan dengan pagination
+- Admin bisa lihat info user: nama, username, email, tanggal daftar
+
+Pagination:
+- per_page = 100 user per halaman
+- Total pages dihitung dengan ceil()
+
+SQL Query:
+SELECT id_pelanggan, nama, username, email, tanggal_daftar 
+FROM pelanggan 
+ORDER BY id_pelanggan DESC 
+LIMIT %s OFFSET %s
+
+Istilah Teknis:
+- ORDER BY DESC: Sorting descending (user terbaru pertama)
+
+---
+
+### Route Delete User @app.route("/admin/user/delete/<int:id_user>") (Lines 686-695)
+
+Fungsi & Kegunaan:
+- Admin menghapus akun user dari database
+
+SQL:
+DELETE FROM pelanggan WHERE id_pelanggan=%s
+
+---
+
+## XVII. ADMIN DESTINASI MANAGEMENT
+
+### Route Admin Destinasi @app.route("/admin/destinasi") - GET & POST (Lines 697-737)
+
+Decorator: @login_required_admin
+
+Fungsi & Kegunaan:
+- Admin bisa menambah destinasi baru (POST)
+- Admin bisa lihat semua destinasi yang ada (GET)
+
+Proses POST (Lines 703-718):
+
+1. Extract Data dari Form
+   nama, lokasi, deskripsi, jam_buka, harga, gambar
+
+2. INSERT ke Database
+   INSERT INTO destinasi (nama, lokasi, deskripsi, jam_buka, harga, gambar)
+   VALUES (%s, %s, %s, %s, %s, %s)
+
+Proses GET (Lines 720-728):
+- Fetch semua destinasi
+- ORDER BY id_destinasi DESC (terbaru pertama)
+
+Istilah Teknis:
+- CRUD Operations: Create, Read, Update, Delete
+- Form Data: Data yang dikirim dari HTML form
+
+---
+
+### Route Edit Destinasi @app.route("/admin/destinasi/edit/<int:id_destinasi>") - POST (Lines 739-764)
+
+Fungsi & Kegunaan:
+- Admin mengupdate data destinasi yang sudah ada
+
+Proses:
+1. Extract data dari request.form
+2. UPDATE query ke database
+3. Redirect kembali ke halaman destinasi
+
+SQL:
+UPDATE destinasi SET
+    nama=%s, lokasi=%s, deskripsi=%s, jam_buka=%s, harga=%s, gambar=%s
+WHERE id_destinasi=%s
+
+Istilah Teknis:
+- UPDATE statement: Query untuk mengubah data existing
+
+Implementasi OOP:
+- Polymorphism: Satu route menangani edit berbagai destinasi
+
+---
+
+### Route Delete Destinasi @app.route("/admin/destinasi/delete/<int:id_destinasi>") (Lines 766-775)
+
+Fungsi & Kegunaan:
+- Admin menghapus destinasi dari database
+
+SQL:
+DELETE FROM destinasi WHERE id_destinasi=%s
+
+---
+
+## XVIII. MAIN ENTRY POINT
+
+### if __name__ == '__main__' Block (Lines 777-794)
+
+Fungsi & Kegunaan:
+- Main entry point aplikasi Flask
+- Run pada startup: test connection → init database → run app
+
+Proses:
+1. Cek WERKZEUG_RUN_MAIN environment variable (prevents double run)
+2. Call test_connection() untuk verify database connection
+3. Call init_database() untuk create tables jika belum ada
+4. Run Flask app dengan app.run()
+
+Parameter:
+- host='0.0.0.0' - Bisa diakses dari IP manapun
+- port=5000 - Port aplikasi
+- debug=True - Enable debug mode untuk development
+
+---
+
+---
+
+# 🏗️ IMPLEMENTASI PRINSIP OOP DALAM KODE
+
+## 1. ABSTRAKSI (Abstraction)
+
+Definisi: Menyembunyikan kompleksitas internal dan hanya menampilkan yang perlu diketahui user.
+
+Contoh dalam kode:
+
+a) Fungsi get_db()
+- User tidak perlu tahu detail koneksi MySQL
+- Cukup panggil get_db() dan terima connection object
+
+b) bcrypt untuk Password Hashing
+- Algoritma hashing yang kompleks disembunyikan
+- User hanya panggil hashpw() & checkpw()
+
+c) Decorator @login_required_pelanggan
+- Logik validasi login disembunyikan di decorator
+- Route hanya perlu add @login_required_pelanggan
+
+---
+
+## 2. ENKAPSULASI (Encapsulation)
+
+Definisi: Menggabungkan data & method yang berkaitan dalam satu unit (fungsi/class) dan membatasi akses dari luar.
+
+Contoh dalam kode:
+
+a) Database Credentials
+- Credentials disimpan di environment variables
+- Tidak hardcoded di code (aman)
+- Hanya `get_db()` yang akses db_config
+
+b) Session Data
+- Data user disimpan dalam session (server-side)
+- Tidak di-expose ke client
+- Hanya accessible melalui session dictionary
+
+c) File Upload Handling
+- Logic file handling (sanitasi, path, naming) dikapsulasi
+- Mencegah directory traversal attacks
+
+---
+
+## 3. POLIMORFISME (Polymorphism)
+
+Definisi: Kemampuan satu interface untuk merepresentasikan berbagai tipe data atau behavior.
+
+Contoh dalam kode:
+
+a) Login Endpoint Menangani 2 Tipe User
+- Satu route `/login` handle 2 tipe user (admin & pelanggan)
+- Behavior berbeda tergantung tipe user
+
+b) Decorator Digunakan untuk Berbagai Route
+- Decorator yang sama digunakan di berbagai route
+- Behavior berbeda tergantung context
+
+---
+
+## 4. INHERITANCE (Warisan)
+
+Definisi: Mewarisi property & method dari class/object lain.
+
+Catatan: Kode ini tidak menggunakan class secara ekstensif (Python functional style), tapi ada beberapa pattern inheritance-like:
+
+a) Flask App Inheritance
+- `app` adalah instance dari Flask class
+- Inherit semua method Flask: route(), run(), etc.
+
+b) Exception Handling Inheritance
+- `mysql.connector.Error` adalah subclass dari `Exception`
+- Polymorph: catch specific error lebih dulu, baru generic
+
+---
+
+## 5. KOMPOSISI (Composition)
+
+Definisi: Membentuk object kompleks dari object yang lebih sederhana.
+
+Contoh dalam kode:
+
+a) Join Query (Komposisi Data)
+- Data tiket & pelanggan dikomposisi dalam satu query result
+- Relationship: tiket punya user_id yang link ke pelanggan
+
+b) Nested Data Structures
+- List of dictionaries = komposisi data primitif
+- Masing-masing destinasi adalah kombinasi dari field yang berbeda
+
+---
+
+## 6. SINGLE RESPONSIBILITY PRINCIPLE (SRP)
+
+Definisi: Setiap function/module punya satu tanggung jawab utama.
+
+Contoh dalam kode:
+
+| Function | Tanggung Jawab |
+|----------|---|
+| get_db() | Buat koneksi database |
+| test_connection() | Test koneksi database |
+| init_database() | Inisialisasi/buat tabel database |
+| login() | Handle login logic |
+| register() | Handle register logic |
+| checkout() | Handle pembelian tiket |
+| upload_bukti() | Handle upload file |
+| kontak() | Handle form kontak & kirim email |
+
+Setiap function fokus pada satu hal saja → mudah maintain & test.
+
+---
+
+## 7. DRY PRINCIPLE (Don't Repeat Yourself)
+
+Definisi: Jangan repeat kode yang sama di multiple tempat.
+
+Contoh dalam kode:
+
+a) Reusable Database Query
+- Digunakan di ratusan tempat dalam file
+- Jika perlu ubah config, cukup ubah satu tempat
+
+b) Reusable Decorator
+- Digunakan di multiple routes
+- Tidak perlu repeat cek login logic di setiap route
+
+---
+
+## RINGKASAN IMPLEMENTASI OOP
+
+| Prinsip OOP | Aplikasi dalam Kode | Manfaat |
+|---|---|---|
+| Abstraksi | get_db(), bcrypt hashing, decorators | Hide complexity, easier to use |
+| Enkapsulasi | Session variables, db_config, file upload | Secure, controlled access |
+| Polimorfisme | Login handle 2 user type, decorator di multiple routes | Reusable, flexible |
+| Komposisi | JOIN queries, nested data structures | Combine simple objects into complex |
+| SRP | Setiap function 1 responsibility | Easy maintain, test, debug |
+| DRY | get_db(), decorator reusable | Less code duplication |
+
+---
+
+KESIMPULAN
+
+Meskipun menggunakan functional style (bukan class-based), kode ini sudah menerapkan prinsip-prinsip OOP yang baik, membuat aplikasi lebih maintainable, scalable, dan secure.
+
+---
+
+END OF DOCUMENT
