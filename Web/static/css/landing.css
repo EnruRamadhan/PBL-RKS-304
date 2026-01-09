@@ -1,6 +1,5 @@
-/* ========== HERO SECTION & SLIDESHOW ========== */
 .hero-section {
-  height: 100vh; /* Full layar */
+  height: 100vh; 
   position: relative;
   overflow: hidden;
   display: flex;
@@ -21,14 +20,13 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;       /* biar gambar nutup semua layar */
-  background-position: center;  /* biar fokus di tengah */
+  background-size: cover;     
+  background-position: center; 
   background-repeat: no-repeat;
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
 }
 
-/* slide aktif muncul penuh */
 .slide.active {
   opacity: 1;
 }
@@ -47,7 +45,6 @@
   z-index: -1;
 }
 
-/* ========== ANIMASI FADE-IN TEKS ========== */
 .fade-in {
   opacity: 0;
   transform: translateY(20px);
@@ -65,7 +62,6 @@
   }
 }
 
-/* ========== NAVBAR SCROLL EFFECT ========== */
 .navbar-scrolled {
   background-color: rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(10px);
