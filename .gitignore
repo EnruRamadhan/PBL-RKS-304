@@ -6,3 +6,4 @@ test_db.py
 test_registration.py
 wisata_db/
 Web/static/uploads/
+connectionDB.env
